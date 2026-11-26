@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Road Trip Trivia — Washington to Canada</title>
+  <style>
+    :root {
+      --bg0: #07110e;
+      --bg1: #0d1c17;
+      --panel: #14241f;
+      --panel-2: #1a2e28;
+      --line: #2d4a40;
+      --cream: #f7f1e3;
+      --muted: #c5bba8;
+      --gold: #f0c75e;
+      --gold-dim: #b8942e;
+      --ernel: #7ad0ff;
+      --ernel-bg: #163042;
+      --angela: #ff9ec8;
+      --angela-bg: #3a1d2c;
+      --correct: #3ee0a0;
+      --correct-bg: #114632;
+      --wrong: #ff6b6b;
+      --wrong-bg: #4a1a1a;
+      --easy: #8ad88a;
+      --medium: #f0c75e;
+      --hard: #ff8a5c;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      background:
+        radial-gradient(ellipse at top, #16352c 0%, var(--bg0) 55%),
+        var(--bg0);
+      color: var(--cream);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.4;
+    }
+
+    body {
+      padding: 12px 14px 28px;
+    }
+
+    button, input {
+      font: inherit;
+      color: inherit;
+    }
+
+    button {
+      touch-action: manipulation;
+      cursor: pointer;
+      border: none;
+      appearance: none;
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .screen[hidden] { display: none !important; }
+
+    h1 {
+      font-size: clamp(1.7rem, 5vw, 2.5rem);
+      letter-spacing: -0.03em;
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--gold);
+      font-weight: 650;
+      font-size: clamp(1rem, 2.8vw, 1.2rem);
+      margin: 8px 0 4px;
+    }
+
+    .lede {
+      text-align: center;
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 40rem;
+      margin: 0 auto 1.4rem;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.15rem;
+      box-shadow: var(--shadow);
+    }
+
+    .howto {
+      margin: 0 0 1.25rem;
+      color: var(--cream);
+      font-size: 1.05rem;
+    }
+    .howto p + p { margin-top: 0.7rem; }
+
+    label.field {
+      display: block;
+      margin-bottom: 0.9rem;
+    }
+    label.field span {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    input[type="text"] {
+      width: 100%;
+      background: var(--bg0);
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      font-size: 1.2rem;
+      min-height: 56px;
+    }
+    input[type="text"]:focus {
+      outline: 3px solid var(--gold);
+      border-color: var(--gold);
+    }
+
+    .names {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    .choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+    }
+    .seg {
+      flex: 1 1 auto;
+      min-height: 56px;
+      min-width: 7.2rem;
+      padding: 0.7rem 0.8rem;
+      border-radius: 14px;
+      background: var(--bg0);
+      border: 2px solid var(--line);
+      color: var(--cream);
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .seg[aria-pressed="true"] {
+      background: #2a4a20;
+      border-color: var(--gold);
+      color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(240, 199, 94, 0.25);
+    }
+
+    .section-label {
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0.3rem 0 0.5rem;
+    }
+
+    .btn-primary, .btn-secondary, .btn-next {
+      display: block;
+      width: 100%;
+      min-height: 64px;
+      border-radius: 16px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: #1a1404;
+      margin-top: 0.4rem;
+    }
+    .btn-primary:active { transform: translateY(1px); }
+    .btn-secondary {
+      background: var(--panel-2);
+      color: var(--cream);
+      border: 2px solid var(--line);
+      margin-top: 0.7rem;
+    }
+    .btn-next {
+      background: var(--gold);
+      color: #1a1404;
+      margin-top: 1rem;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0.55rem;
+      align-items: stretch;
+      margin-bottom: 0.85rem;
+    }
+    .score-card {
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      padding: 0.65rem 0.75rem 0.7rem;
+      text-align: center;
+      min-height: 76px;
+    }
+    .score-card .who {
+      font-weight: 800;
+      font-size: 1.05rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .score-card .pts {
+      font-size: 1.7rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .score-card .sub {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .score-card.p0 .who, .score-card.p0 .pts { color: var(--ernel); }
+    .score-card.p1 .who, .score-card.p1 .pts { color: var(--angela); }
+    .score-card.active {
+      box-shadow: 0 0 0 3px var(--gold);
+    }
+    .score-card.p0.active { background: var(--ernel-bg); border-color: var(--ernel); }
+    .score-card.p1.active { background: var(--angela-bg); border-color: var(--angela); }
+    .progress-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 4.8rem;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.88rem;
+      text-align: center;
+    }
+    .progress-col strong {
+      color: var(--cream);
+      font-size: 1.15rem;
+      display: block;
+    }
+
+    .q-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+      margin: 0.2rem 0 0.7rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 0.28rem 0.7rem;
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .badge.easy { background: #1c3d22; color: var(--easy); }
+    .badge.medium { background: #3d3210; color: var(--medium); }
+    .badge.hard { background: #4a2414; color: var(--hard); }
+    .badge.cat {
+      background: var(--panel-2);
+      color: var(--cream);
+      border: 1px solid var(--line);
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 700;
+    }
+    .badge.worth {
+      background: #3d3210;
+      color: var(--gold);
+    }
+
+    .question {
+      font-size: clamp(1.35rem, 3.6vw, 1.85rem);
+      font-weight: 750;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin-bottom: 0.95rem;
+    }
+
+    .buzz-panel {
+      margin-bottom: 0.9rem;
+    }
+    .buzz-panel h2 {
+      font-size: 1.15rem;
+      text-align: center;
+      margin-bottom: 0.6rem;
+    }
+    .buzz-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem;
+    }
+    .btn-buzz {
+      min-height: 88px;
+      border-radius: 18px;
+      font-size: 1.3rem;
+      font-weight: 800;
+      border: 3px solid transparent;
+    }
+    .btn-buzz.p0 { background: var(--ernel); color: #052033; }
+    .btn-buzz.p1 { background: var(--angela); color: #3a1020; }
+    .btn-buzz:disabled { opacity: 0.45; }
+
+    .answers {
+      display: grid;
+      gap: 0.65rem;
+    }
+    .btn-answer {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.8rem;
+      align-items: center;
+      text-align: left;
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 16px;
+      min-height: 68px;
+      padding: 0.75rem 0.9rem;
+      font-size: 1.15rem;
+      font-weight: 650;
+    }
+    .btn-answer .letter {
+      width: 2.15rem;
+      height: 2.15rem;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg0);
+      color: var(--gold);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .btn-answer:disabled { cursor: default; }
+    .btn-answer:not(:disabled):active { transform: translateY(1px); }
+    .answers.locked .btn-answer:not(.correct):not(.wrong) { opacity: 0.55; }
+    .btn-answer.correct {
+      background: var(--correct-bg);
+      border-color: var(--correct);
+      color: #eafff5;
+    }
+    .btn-answer.correct .letter { background: var(--correct); color: #062015; }
+    .btn-answer.wrong {
+      background: var(--wrong-bg);
+      border-color: var(--wrong);
+    }
+    .btn-answer.wrong .letter { background: var(--wrong); color: #2a0707; }
+
+    .voice-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin: 0.85rem 0 0.2rem;
+    }
+    .btn-mic {
+      min-width: 64px;
+      min-height: 64px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 3px solid var(--gold);
+      color: var(--gold);
+      font-size: 1.7rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .btn-mic.listening {
+      background: #4a2414;
+      border-color: var(--hard);
+      color: #fff;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    .btn-mic:disabled {
+      opacity: 0.4;
+      border-color: var(--line);
+      color: var(--muted);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 138, 92, 0.5); }
+      50% { transform: scale(1.06); box-shadow: 0 0 0 10px rgba(255, 138, 92, 0); }
+    }
+    .voice-status {
+      color: var(--muted);
+      font-size: 1rem;
+      min-height: 2.6em;
+    }
+    .voice-status strong { color: var(--cream); }
+    .voice-note {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 0.4rem;
+    }
+
+    .feedback {
+      margin-top: 0.9rem;
+      padding: 0.9rem 1rem;
+      border-radius: 16px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      font-size: 1.08rem;
+    }
+    .feedback .verdict {
+      font-weight: 800;
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+    }
+    .feedback .verdict.ok { color: var(--correct); }
+    .feedback .verdict.no { color: var(--wrong); }
+
+    .results-hero {
+      text-align: center;
+      padding: 0.5rem 0 1rem;
+    }
+    .results-hero h1 { margin-bottom: 0.5rem; }
+    .results-hero .tagline {
+      font-size: 1.25rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .result-card {
+      text-align: center;
+      padding: 1rem 0.7rem;
+    }
+    .result-card .who { font-size: 1.15rem; font-weight: 800; }
+    .result-card.p0 .who { color: var(--ernel); }
+    .result-card.p1 .who { color: var(--angela); }
+    .result-card .pts { font-size: 2.4rem; font-weight: 800; line-height: 1.05; }
+    .result-card .sub { color: var(--muted); margin-top: 0.25rem; }
+    .result-card.winner {
+      box-shadow: 0 0 0 3px var(--gold);
+    }
+
+    @media (min-width: 640px) {
+      .answers { grid-template-columns: 1fr 1fr; }
+      body { padding: 18px 20px 36px; }
+    }
+
+    @media (orientation: landscape) and (max-height: 620px) {
+      body { padding: 8px 16px 16px; }
+      .question { font-size: 1.3rem; margin-bottom: 0.55rem; }
+      .btn-answer { min-height: 56px; font-size: 1.05rem; }
+      .btn-buzz { min-height: 64px; }
+      .score-card { min-height: 64px; padding: 0.4rem 0.6rem; }
+      .score-card .pts { font-size: 1.4rem; }
+      h1 { font-size: 1.55rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section id="screen-start" class="screen">
+      <h1>🌲 Road Trip Trivia 🍁</h1>
+      <p class="subtitle">Washington → Canada</p>
+      <p class="lede">A two-player quiz for the drive, built for Ernel and Angela.</p>
+
+      <div class="panel howto" id="howto">
+        <p>Ernel and Angela, this is your Washington-to-Canada road-trip trivia night. Pick your names, choose alternating turns or a shared buzz-in pool, and decide whether to play 20, 30, or all 50 questions.</p>
+        <p>Questions run easy to hard, and harder ones are worth more points; just tap a letter or hit the mic and say the answer (or say A, B, C, or D). After each guess you'll see the right answer and a short explanation, then move on. At the end you can rematch with a fresh shuffle or start a new game.</p>
+      </div>
+
+      <div class="panel">
+        <div class="names">
+          <label class="field">
+            <span>Player 1</span>
+            <input id="name0" type="text" maxlength="24" value="Ernel" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="field">
+            <span>Player 2</span>
+            <input id="name1" type="text" maxlength="24" value="Angela" autocomplete="off" spellcheck="false">
+          </label>
+        </div>
+
+        <p class="section-label">How you play</p>
+        <div class="choice-row" role="group" aria-label="Turn mode">
+          <button type="button" class="seg" id="mode-alt" aria-pressed="true">Alternating turns</button>
+          <button type="button" class="seg" id="mode-pool" aria-pressed="false">Shared buzz-in pool</button>
+        </div>
+
+        <p class="section-label">Game length</p>
+        <div class="choice-row" role="group" aria-label="Number of questions">
+          <button type="button" class="seg" id="len-20" aria-pressed="true">20 questions</button>
+          <button type="button" class="seg" id="len-30" aria-pressed="false">30 questions</button>
+          <button type="button" class="seg" id="len-50" aria-pressed="false">All 50</button>
+        </div>
+
+        <button type="button" class="btn-primary" id="btn-start">Start the trip</button>
+      </div>
+    </section>
+
+    <section id="screen-game" class="screen" hidden>
+      <div class="scoreboard" aria-live="polite">
+        <div class="score-card p0" id="card0">
+          <div class="who" id="board-name0">Ernel</div>
+          <div class="pts" id="board-pts0">0</div>
+          <div class="sub" id="board-correct0">0 correct</div>
+        </div>
+        <div class="progress-col">
+          <strong id="progress-label">1 / 20</strong>
+          Q
+        </div>
+        <div class="score-card p1" id="card1">
+          <div class="who" id="board-name1">Angela</div>
+          <div class="pts" id="board-pts1">0</div>
+          <div class="sub" id="board-correct1">0 correct</div>
+        </div>
+      </div>
+
+      <div class="q-meta">
+        <span class="badge" id="diff-badge">Easy</span>
+        <span class="badge cat" id="cat-badge">Geography</span>
+        <span class="badge worth" id="worth-badge">Worth 1 point</span>
+      </div>
+
+      <p class="question" id="question-text"></p>
+
+      <div class="buzz-panel" id="buzz-panel" hidden>
+        <h2>Who is answering?</h2>
+        <div class="buzz-row">
+          <button type="button" class="btn-buzz p0" id="buzz0">Ernel</button>
+          <button type="button" class="btn-buzz p1" id="buzz1">Angela</button>
+        </div>
+      </div>
+
+      <div class="answers" id="answers"></div>
+
+      <div class="voice-row" id="voice-row">
+        <button type="button" class="btn-mic" id="btn-mic" aria-label="Answer with your voice">🎤</button>
+        <p class="voice-status" id="voice-status">Tap the mic and say a letter or the answer.</p>
+      </div>
+      <p class="voice-note" id="voice-unsupported" hidden>Voice answers aren't supported in this browser. Tap an answer instead.</p>
+
+      <div class="feedback" id="feedback" hidden></div>
+      <button type="button" class="btn-next" id="btn-next" hidden>Next question</button>
+    </section>
+
+    <section id="screen-results" class="screen" hidden>
+      <div class="results-hero">
+        <h1 id="results-title">That's the end of the road</h1>
+        <p class="tagline" id="results-tagline"></p>
+      </div>
+      <div class="result-grid">
+        <div class="panel result-card p0" id="result-card0">
+          <div class="who" id="result-name0">Ernel</div>
+          <div class="pts" id="result-pts0">0</div>
+          <div class="sub" id="result-correct0">0 correct</div>
+        </div>
+        <div class="panel result-card p1" id="result-card1">
+          <div class="who" id="result-name1">Angela</div>
+          <div class="pts" id="result-pts1">0</div>
+          <div class="sub" id="result-correct1">0 correct</div>
+        </div>
+      </div>
+      <button type="button" class="btn-primary" id="btn-rematch">Rematch</button>
+      <button type="button" class="btn-secondary" id="btn-new">New game</button>
+    </section>
+  </div>
+
+  <script>
+(function (global) {
+  "use strict";
+
+  var QUESTIONS = [
+    { difficulty: "easy", category: "US History", question: "Who was the first President of the United States?", options: ["Thomas Jefferson", "George Washington", "John Adams", "Benjamin Franklin"], answer: "George Washington", explanation: "George Washington took office in 1789 after leading the Continental Army in the Revolutionary War." },
+    { difficulty: "easy", category: "Geography", question: "Which ocean lies on the west coast of Washington State?", options: ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"], answer: "Pacific Ocean", explanation: "Washington's coastline faces the Pacific, which also borders Oregon, California, and British Columbia." },
+    { difficulty: "easy", category: "Science", question: "What is H2O more commonly known as?", options: ["Salt", "Oxygen", "Hydrogen peroxide", "Water"], answer: "Water", explanation: "A water molecule is made of two hydrogen atoms and one oxygen atom." },
+    { difficulty: "easy", category: "Pop Culture", question: "Who played Iron Man in the Marvel Cinematic Universe films?", options: ["Chris Evans", "Chris Hemsworth", "Robert Downey Jr.", "Mark Ruffalo"], answer: "Robert Downey Jr.", explanation: "Robert Downey Jr. first appeared as Tony Stark in the 2008 film Iron Man." },
+    { difficulty: "easy", category: "General Knowledge", question: "How many days are in a leap year?", options: ["364", "365", "366", "367"], answer: "366", explanation: "A leap year adds February 29, making 366 days instead of the usual 365." },
+    { difficulty: "easy", category: "Pacific Northwest", question: "Which U.S. state is nicknamed the Evergreen State?", options: ["Oregon", "Washington", "Idaho", "Montana"], answer: "Washington", explanation: "Washington earned the nickname for its dense year-round forests of fir, hemlock, and cedar." },
+    { difficulty: "easy", category: "Canada", question: "What is the capital city of Canada?", options: ["Toronto", "Vancouver", "Montreal", "Ottawa"], answer: "Ottawa", explanation: "Ottawa, in Ontario, has been Canada's capital since the mid-19th century." },
+    { difficulty: "easy", category: "Fun Facts", question: "What is the only even prime number?", options: ["0", "1", "2", "4"], answer: "2", explanation: "Every even number greater than 2 can be divided by 2, so 2 is the only even prime." },
+    { difficulty: "easy", category: "European History", question: "In which city was the Eiffel Tower built?", options: ["London", "Rome", "Paris", "Berlin"], answer: "Paris", explanation: "The Eiffel Tower was completed in 1889 as the entrance arch for the Exposition Universelle in Paris." },
+    { difficulty: "easy", category: "US History", question: "In what year did the United States adopt the Declaration of Independence?", options: ["1776", "1787", "1789", "1812"], answer: "1776", explanation: "The Continental Congress adopted the Declaration of Independence on July 4, 1776." },
+    { difficulty: "easy", category: "Science", question: "How many planets are officially recognized in our solar system?", options: ["7", "8", "9", "10"], answer: "8", explanation: "Since Pluto was reclassified as a dwarf planet in 2006, the IAU recognizes eight planets." },
+    { difficulty: "easy", category: "Pop Culture", question: "What is the name of Harry Potter's owl?", options: ["Crookshanks", "Scabbers", "Fang", "Hedwig"], answer: "Hedwig", explanation: "Hedwig is the snowy owl Hagrid gives Harry for his eleventh birthday." },
+    { difficulty: "easy", category: "Geography", question: "What is the largest continent by land area?", options: ["Africa", "Asia", "North America", "Antarctica"], answer: "Asia", explanation: "Asia covers about 44 million square kilometers, more than any other continent." },
+    { difficulty: "easy", category: "Fun Facts", question: "How many colors are traditionally listed in a rainbow?", options: ["5", "6", "7", "8"], answer: "7", explanation: "The traditional sequence is red, orange, yellow, green, blue, indigo, and violet." },
+    { difficulty: "easy", category: "Geography", question: "Which U.S. state is the largest by area?", options: ["Texas", "California", "Alaska", "Montana"], answer: "Alaska", explanation: "Alaska is more than twice the size of Texas, the second-largest state." },
+    { difficulty: "easy", category: "European History", question: "Which wall in Germany was opened in 1989?", options: ["Hadrian's Wall", "The Berlin Wall", "The Great Wall", "The Antonine Wall"], answer: "The Berlin Wall", explanation: "The Berlin Wall, which had divided East and West Berlin since 1961, was opened on November 9, 1989." },
+    { difficulty: "easy", category: "Canada", question: "Which waterfall sits on the border of Ontario and New York?", options: ["Yosemite Falls", "Multnomah Falls", "Niagara Falls", "Victoria Falls"], answer: "Niagara Falls", explanation: "Niagara Falls is a group of waterfalls on the Niagara River shared by Canada and the United States." },
+
+    { difficulty: "medium", category: "US History", question: "From which country did the United States buy the Louisiana Purchase?", options: ["Spain", "Britain", "France", "Mexico"], answer: "France", explanation: "In 1803, the United States purchased the Louisiana Territory from Napoleon's France for $15 million." },
+    { difficulty: "medium", category: "European History", question: "In which year did World War II end in Europe?", options: ["1943", "1944", "1945", "1946"], answer: "1945", explanation: "Nazi Germany surrendered in May 1945, ending the war in Europe; the Pacific war ended later that year." },
+    { difficulty: "medium", category: "Geography", question: "What is the capital of Australia?", options: ["Sydney", "Melbourne", "Canberra", "Perth"], answer: "Canberra", explanation: "Canberra was purpose-built as the capital, a compromise between rivals Sydney and Melbourne." },
+    { difficulty: "medium", category: "Science", question: "At standard atmospheric pressure, at what Celsius temperature does water boil?", options: ["90°C", "100°C", "110°C", "212°C"], answer: "100°C", explanation: "At 1 atmosphere of pressure, water boils at 100 degrees Celsius, which is 212 degrees Fahrenheit." },
+    { difficulty: "medium", category: "Pop Culture", question: "In which English city did the Beatles form?", options: ["London", "Manchester", "Liverpool", "Birmingham"], answer: "Liverpool", explanation: "John, Paul, George, and later Ringo all came out of Liverpool's 1960s music scene." },
+    { difficulty: "medium", category: "General Knowledge", question: "How many amendments make up the U.S. Bill of Rights?", options: ["5", "8", "10", "12"], answer: "10", explanation: "The first ten amendments to the U.S. Constitution, ratified in 1791, are known as the Bill of Rights." },
+    { difficulty: "medium", category: "Pacific Northwest", question: "The Space Needle was built for which event?", options: ["The 1962 Seattle World's Fair", "The 1909 Alaska-Yukon-Pacific Exposition", "The 1986 Expo in Vancouver", "The 1939 New York World's Fair"], answer: "The 1962 Seattle World's Fair", explanation: "The Space Needle was the centerpiece of Seattle's Century 21 Exposition in 1962." },
+    { difficulty: "medium", category: "Canada", question: "Which two languages are official at the federal level in Canada?", options: ["English and Spanish", "English and French", "French and German", "English and Inuktitut"], answer: "English and French", explanation: "The Official Languages Act makes English and French the official languages of the Canadian federal government." },
+    { difficulty: "medium", category: "Fun Facts", question: "A group of lions is commonly called a what?", options: ["Herd", "Pack", "Pride", "Flock"], answer: "Pride", explanation: "Lions are the only big cats that regularly live in social groups, called prides." },
+    { difficulty: "medium", category: "US History", question: "How many stars are on the current official flag of the United States?", options: ["48", "49", "50", "52"], answer: "50", explanation: "The 50th star was added in 1960 after Hawaii became a state in 1959." },
+    { difficulty: "medium", category: "European History", question: "The Magna Carta was sealed in which year?", options: ["1066", "1215", "1492", "1688"], answer: "1215", explanation: "King John of England sealed the Magna Carta at Runnymede in 1215, limiting the power of the crown." },
+    { difficulty: "medium", category: "Science", question: "What does DNA stand for?", options: ["Dynamic Nuclear Acid", "Deoxyribonucleic acid", "Dioxin Nucleic Agent", "Dual Nucleotide Array"], answer: "Deoxyribonucleic acid", explanation: "DNA is the molecule that carries genetic instructions in living organisms." },
+    { difficulty: "medium", category: "Pacific Northwest", question: "Which mountain, visible from much of the Seattle area, is the highest in Washington State?", options: ["Mount Baker", "Mount Adams", "Mount Rainier", "Mount St. Helens"], answer: "Mount Rainier", explanation: "Mount Rainier rises just over 14,400 feet and is the most heavily glaciated peak in the contiguous United States." },
+    { difficulty: "medium", category: "General Knowledge", question: "Who painted the ceiling of the Sistine Chapel?", options: ["Leonardo da Vinci", "Raphael", "Michelangelo", "Donatello"], answer: "Michelangelo", explanation: "Michelangelo painted the Sistine Chapel ceiling between 1508 and 1512 for Pope Julius II." },
+    { difficulty: "medium", category: "Pop Culture", question: "Which singer is often called the Queen of Pop and released the album Like a Virgin?", options: ["Whitney Houston", "Madonna", "Cher", "Cyndi Lauper"], answer: "Madonna", explanation: "Madonna released Like a Virgin in 1984 and is widely known by the nickname Queen of Pop." },
+    { difficulty: "medium", category: "Fun Facts", question: "How many hearts does an octopus have?", options: ["1", "2", "3", "8"], answer: "3", explanation: "An octopus has two hearts that pump blood to the gills and a third that pumps it through the body." },
+    { difficulty: "medium", category: "General Knowledge", question: "What number is represented by the Roman numeral L?", options: ["10", "50", "100", "500"], answer: "50", explanation: "In Roman numerals, L is 50, C is 100, D is 500, and M is 1,000." },
+
+    { difficulty: "hard", category: "US History", question: "The 19th Amendment to the U.S. Constitution did which of the following?", options: ["Abolished slavery", "Limited presidents to two terms", "Granted women the right to vote", "Lowered the voting age to 18"], answer: "Granted women the right to vote", explanation: "The 19th Amendment was ratified in 1920; the 13th abolished slavery, the 22nd set term limits, and the 26th lowered the voting age." },
+    { difficulty: "hard", category: "European History", question: "In which year was the Battle of Hastings fought?", options: ["1066", "1215", "1415", "1588"], answer: "1066", explanation: "William of Normandy defeated King Harold II at Hastings in 1066 and became William the Conqueror." },
+    { difficulty: "hard", category: "Canada", question: "What is the capital of British Columbia?", options: ["Vancouver", "Victoria", "Kelowna", "Whistler"], answer: "Victoria", explanation: "Victoria, on the southern tip of Vancouver Island, is the provincial capital; Vancouver is the largest city." },
+    { difficulty: "hard", category: "Science", question: "Which moon is the largest in the solar system?", options: ["Titan", "Europa", "Earth's Moon", "Ganymede"], answer: "Ganymede", explanation: "Jupiter's moon Ganymede is larger than the planet Mercury and is the solar system's largest moon." },
+    { difficulty: "hard", category: "Pacific Northwest", question: "The Strait of Juan de Fuca separates the Olympic Peninsula from which island?", options: ["Vancouver Island", "San Juan Island", "Whidbey Island", "Haida Gwaii"], answer: "Vancouver Island", explanation: "The Strait of Juan de Fuca is the outlet of the Salish Sea, running between Washington's Olympic Peninsula and Vancouver Island." },
+    { difficulty: "hard", category: "US History", question: "In what year did Washington become a U.S. state?", options: ["1853", "1876", "1889", "1912"], answer: "1889", explanation: "Washington was admitted as the 42nd state on November 11, 1889; it had been a territory since 1853." },
+    { difficulty: "hard", category: "European History", question: "The Hundred Years' War was fought primarily between which two kingdoms?", options: ["Spain and Portugal", "England and France", "Austria and Prussia", "Rome and Carthage"], answer: "England and France", explanation: "The conflict lasted from 1337 to 1453 and was a long struggle over claims to the French throne." },
+    { difficulty: "hard", category: "Geography", question: "Which mountain range forms much of the border between France and Spain?", options: ["The Alps", "The Apennines", "The Pyrenees", "The Carpathians"], answer: "The Pyrenees", explanation: "The Pyrenees run from the Atlantic to the Mediterranean, separating the Iberian Peninsula from the rest of Europe." },
+    { difficulty: "hard", category: "Science", question: "Which element has the atomic number 26?", options: ["Copper", "Iron", "Nickel", "Zinc"], answer: "Iron", explanation: "Iron's atomic number is 26; copper is 29, nickel is 28, and zinc is 30." },
+    { difficulty: "hard", category: "Canada", question: "Which Canadian province is officially bilingual at the provincial level?", options: ["Quebec", "Ontario", "New Brunswick", "Manitoba"], answer: "New Brunswick", explanation: "New Brunswick is the only province that is officially bilingual; Quebec's official language is French." },
+    { difficulty: "hard", category: "General Knowledge", question: "How many time zones does Canada span?", options: ["4", "5", "6", "8"], answer: "6", explanation: "Canada uses six time zones, from Pacific in the west to Newfoundland Time in the east." },
+    { difficulty: "hard", category: "Pop Culture", question: "Who wrote the lyrics to The Star-Spangled Banner?", options: ["Betsy Ross", "Francis Scott Key", "John Philip Sousa", "Irving Berlin"], answer: "Francis Scott Key", explanation: "Key wrote the poem in 1814 after watching the bombardment of Fort McHenry; it later became the U.S. national anthem." },
+    { difficulty: "hard", category: "Fun Facts", question: "Which mammal is known for laying eggs, along with the echidna?", options: ["Wombat", "Platypus", "Koala", "Kangaroo"], answer: "Platypus", explanation: "The platypus and echidnas are the only living monotremes, or egg-laying mammals." },
+    { difficulty: "hard", category: "US History", question: "The Oregon Treaty of 1846 set the western U.S.–British North America border mainly along which line?", options: ["The 42nd parallel", "The 49th parallel", "The Columbia River", "The 54th parallel"], answer: "The 49th parallel", explanation: "The treaty settled the Oregon boundary dispute by extending the 49th parallel west, with Vancouver Island remaining British." },
+    { difficulty: "hard", category: "General Knowledge", question: "In Canada's system of government, who is the head of government?", options: ["The President", "The Governor General", "The Prime Minister", "The Chief Justice"], answer: "The Prime Minister", explanation: "Canada is a constitutional monarchy: the monarch is head of state, and the prime minister is head of government." },
+    { difficulty: "hard", category: "European History", question: "Marie Curie was the first person to win Nobel Prizes in two scientific fields. Those fields were:", options: ["Physics and Medicine", "Chemistry and Medicine", "Physics and Chemistry", "Peace and Physics"], answer: "Physics and Chemistry", explanation: "She shared the 1903 Nobel Prize in Physics and won the 1911 Nobel Prize in Chemistry for her work on radioactivity and radium." }
+  ];
+
+  var POINTS = { easy: 1, medium: 2, hard: 3 };
+  var LETTERS = ["A", "B", "C", "D"];
+  var SMALL_WORDS = { a: 1, an: 1, the: 1, of: 1, and: 1, or: 1, to: 1, in: 1, on: 1, for: 1, at: 1 };
+
+  var ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+  var TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+  var WORD_TO_NUM = {
+    zero: 0, oh: 0, a: 1, one: 1, two: 2, three: 3, four: 4, five: 5,
+    six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12,
+    thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17,
+    eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50,
+    sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100, thousand: 1000
+  };
+
+  function pointsFor(diff) {
+    return POINTS[diff] || 1;
+  }
+
+  function shuffle(list) {
+    var arr = list.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i];
+      arr[i] = arr[j];
+      arr[j] = t;
+    }
+    return arr;
+  }
+
+  function buildRound(count) {
+    var by = { easy: [], medium: [], hard: [] };
+    QUESTIONS.forEach(function (q) { by[q.difficulty].push(q); });
+    var easy = shuffle(by.easy);
+    var medium = shuffle(by.medium);
+    var hard = shuffle(by.hard);
+    var ordered = easy.concat(medium, hard);
+    if (count && count < ordered.length) ordered = ordered.slice(0, count);
+    return ordered.map(function (q) {
+      var opts = shuffle(q.options.slice());
+      return {
+        difficulty: q.difficulty,
+        category: q.category,
+        question: q.question,
+        options: opts,
+        answer: q.answer,
+        explanation: q.explanation,
+        points: pointsFor(q.difficulty)
+      };
+    });
+  }
+
+  function numberToWords(n) {
+    n = Math.abs(parseInt(n, 10));
+    if (isNaN(n)) return "";
+    if (n < 20) return ONES[n];
+    if (n < 100) {
+      var ones = n % 10;
+      return TENS[Math.floor(n / 10)] + (ones ? " " + ONES[ones] : "");
+    }
+    if (n < 1000) {
+      var rest = n % 100;
+      return ONES[Math.floor(n / 100)] + " hundred" + (rest ? " " + numberToWords(rest) : "");
+    }
+    if (n < 10000) {
+      var low = n % 1000;
+      return numberToWords(Math.floor(n / 1000)) + " thousand" + (low ? " " + numberToWords(low) : "");
+    }
+    return String(n);
+  }
+
+  function yearToSpoken(n) {
+    n = parseInt(n, 10);
+    if (isNaN(n) || n < 1000 || n > 9999) return "";
+    var left = Math.floor(n / 100);
+    var right = n % 100;
+    if (right < 10) {
+      return numberToWords(left) + " oh " + numberToWords(right);
+    }
+    return numberToWords(left) + " " + numberToWords(right);
+  }
+
+  function tokenize(s) {
+    return s.split(" ").filter(Boolean);
+  }
+
+  function parseNumberPhrase(tokens, start) {
+    var i = start;
+    var total = 0;
+    var current = 0;
+    var used = 0;
+    while (i < tokens.length) {
+      var w = tokens[i];
+      var val = WORD_TO_NUM.hasOwnProperty(w) ? WORD_TO_NUM[w] : null;
+      if (val === null) break;
+      if (w === "a" && (i + 1 >= tokens.length || (tokens[i + 1] !== "hundred" && tokens[i + 1] !== "thousand"))) break;
+      if (val === 100) {
+        current = (current || 1) * 100;
+      } else if (val === 1000) {
+        current = (current || 1) * 1000;
+        total += current;
+        current = 0;
+      } else if (val < 10) {
+        if (current % 10 !== 0) break;
+        current += val;
+      } else if (val < 100) {
+        if (current % 100 !== 0) break;
+        current += val;
+      } else {
+        current += val;
+      }
+      used++;
+      i++;
+    }
+    if (!used) return null;
+    return { value: total + current, consumed: used };
+  }
+
+  function wordsToDigits(text) {
+    var tokens = tokenize(text);
+    var out = [];
+    var i = 0;
+    while (i < tokens.length) {
+      var parsed = parseNumberPhrase(tokens, i);
+      if (parsed && parsed.consumed) {
+        var nums = [String(parsed.value)];
+        var j = i + parsed.consumed;
+        var second = parseNumberPhrase(tokens, j);
+        if (second && second.consumed && parsed.value >= 10 && parsed.value <= 99 && second.value <= 99) {
+          var year = parsed.value * 100 + second.value;
+          nums = [String(year)];
+          j += second.consumed;
+        }
+        out.push(nums[0]);
+        i = j;
+      } else {
+        out.push(tokens[i]);
+        i++;
+      }
+    }
+    return out.join(" ");
+  }
+
+  function digitWordVariants(text) {
+    var variants = [text];
+    var matches = text.match(/\d+/g);
+    if (!matches) return variants;
+    matches.forEach(function (m) {
+      var n = parseInt(m, 10);
+      var words = [numberToWords(n)];
+      var year = yearToSpoken(n);
+      if (year && words.indexOf(year) === -1) words.push(year);
+      var next = [];
+      variants.forEach(function (v) {
+        words.forEach(function (w) {
+          next.push(v.replace(m, w));
+        });
+      });
+      variants = next;
+    });
+    return variants;
+  }
+
+  function digitsToWords(text) {
+    return digitWordVariants(text)[0] || text;
+  }
+
+  function normalizeText(s) {
+    if (s == null) return "";
+    var t = String(s).toLowerCase();
+    t = t.replace(/[°º]/g, " degrees ");
+    t = t.replace(/\bcelsius\b/g, "c");
+    t = t.replace(/\bcentigrade\b/g, "c");
+    t = t.replace(/degrees\s+c\b/g, "degrees c");
+    t = t.replace(/&/g, " and ");
+    t = t.replace(/[’']/g, "");
+    t = t.replace(/[^a-z0-9\s]/g, " ");
+    t = t.replace(/\s+/g, " ").trim();
+    return t;
+  }
+
+  function stripLeadingThe(s) {
+    return s.replace(/^(the|a|an)\s+/, "");
+  }
+
+  function stripFiller(s) {
+    return s.replace(/^(i think (it is|it was|its)|i'll go with|i will go with|we will go with|we'll go with|my answer is|the answer is|answer is|it is|it's|its|go with|i say|we say)\s+/, "");
+  }
+
+  function levenshtein(a, b) {
+    if (a === b) return 0;
+    if (!a) return b.length;
+    if (!b) return a.length;
+    var al = a.length;
+    var bl = b.length;
+    var prev = new Array(bl + 1);
+    var cur = new Array(bl + 1);
+    var i, j;
+    for (j = 0; j <= bl; j++) prev[j] = j;
+    for (i = 1; i <= al; i++) {
+      cur[0] = i;
+      for (j = 1; j <= bl; j++) {
+        var cost = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+        var del = prev[j] + 1;
+        var ins = cur[j - 1] + 1;
+        var sub = prev[j - 1] + cost;
+        cur[j] = Math.min(del, ins, sub);
+      }
+      var tmp = prev;
+      prev = cur;
+      cur = tmp;
+    }
+    return prev[bl];
+  }
+
+  function similarity(a, b) {
+    if (!a && !b) return 1;
+    if (!a || !b) return 0;
+    var d = levenshtein(a, b);
+    return 1 - d / Math.max(a.length, b.length);
+  }
+
+  function significantTokens(s) {
+    return tokenize(s).filter(function (w) { return w.length > 1 && !SMALL_WORDS[w]; });
+  }
+
+  function tokenScores(spoken, option) {
+    var a = significantTokens(spoken);
+    var b = significantTokens(option);
+    if (!b.length) {
+      a = tokenize(spoken);
+      b = tokenize(option);
+    }
+    if (!b.length) return { jaccard: 0, coverage: 0 };
+    var setA = {};
+    a.forEach(function (w) { setA[w] = 1; });
+    var inter = 0;
+    b.forEach(function (w) { if (setA[w]) inter++; });
+    var union = {};
+    a.concat(b).forEach(function (w) { union[w] = 1; });
+    var unionSize = 0;
+    for (var k in union) if (union.hasOwnProperty(k)) unionSize++;
+    return {
+      jaccard: unionSize ? inter / unionSize : 0,
+      coverage: inter / b.length
+    };
+  }
+
+  var LETTER_ALIASES = {
+    a: "A", ay: "A", aye: "A", ey: "A",
+    b: "B", be: "B", bee: "B",
+    c: "C", see: "C", sea: "C", cee: "C", si: "C",
+    d: "D", de: "D", dee: "D"
+  };
+
+  function matchLetter(normalized) {
+    var s = stripFiller(normalized);
+    s = s.replace(/^(the\s+)?(letter|option|choice|answer)\s+/, "");
+    s = s.replace(/^(the\s+)/, "");
+    s = s.trim();
+    if (LETTER_ALIASES[s]) return LETTER_ALIASES[s];
+    return null;
+  }
+
+  function collectForms(base) {
+    var forms = [base, stripLeadingThe(wordsToDigits(base))];
+    digitWordVariants(base).forEach(function (v) {
+      forms.push(stripLeadingThe(normalizeText(v)));
+    });
+    var unique = [];
+    var seen = {};
+    forms.forEach(function (f) {
+      if (f && !seen[f]) {
+        seen[f] = 1;
+        unique.push(f);
+      }
+    });
+    return unique;
+  }
+
+  function optionForms(text) {
+    return collectForms(stripLeadingThe(normalizeText(text)));
+  }
+
+  function spokenForms(text) {
+    return collectForms(stripLeadingThe(stripFiller(normalizeText(text))));
+  }
+
+  function scoreAgainstOption(spoken, optionText) {
+    var best = 0;
+    var sForms = spokenForms(spoken);
+    var oForms = optionForms(optionText);
+    for (var i = 0; i < sForms.length; i++) {
+      for (var j = 0; j < oForms.length; j++) {
+        var s = sForms[i];
+        var o = oForms[j];
+        if (s === o) return 1;
+        var sim = similarity(s, o);
+        var ts = tokenScores(s, o);
+        var combined = Math.max(sim, ts.coverage * 0.85 + ts.jaccard * 0.15, ts.coverage >= 1 && o.length >= 4 ? 0.93 : 0);
+        if (o.indexOf(s) !== -1 && s.length >= 4 && s.length / o.length >= 0.5) {
+          combined = Math.max(combined, 0.9);
+        }
+        var spokenToks = significantTokens(s);
+        var optionToks = significantTokens(o);
+        var optionSet = {};
+        optionToks.forEach(function (w) { optionSet[w] = 1; });
+        var allSpokenFound = spokenToks.length > 0 && spokenToks.every(function (w) { return optionSet[w]; });
+        var distinctive = spokenToks.some(function (w) { return w.length >= 5; });
+        if (allSpokenFound && distinctive) {
+          combined = Math.max(combined, 0.92);
+        }
+        if (combined > best) best = combined;
+      }
+    }
+    return best;
+  }
+
+  function matchVoiceAnswer(transcripts, optionTexts) {
+    var list = Array.isArray(transcripts) ? transcripts : [transcripts];
+    list = list.map(function (t) { return t == null ? "" : String(t); }).filter(function (t) { return normalizeText(t); });
+    var heard = list[0] || "";
+    if (!list.length) {
+      return { matchIndex: null, heard: "", confident: false, score: 0 };
+    }
+
+    var scores = [0, 0, 0, 0];
+    list.forEach(function (raw, altIdx) {
+      var weight = altIdx === 0 ? 1 : 0.92;
+      var norm = normalizeText(raw);
+      var letter = matchLetter(norm);
+      if (letter) {
+        var li = LETTERS.indexOf(letter);
+        if (li >= 0) scores[li] = Math.max(scores[li], 1 * weight);
+      }
+      for (var i = 0; i < optionTexts.length; i++) {
+        var s = scoreAgainstOption(raw, optionTexts[i]) * weight;
+        if (s > scores[i]) scores[i] = s;
+      }
+    });
+
+    var best = -1;
+    var bestIdx = -1;
+    var second = -1;
+    for (var i = 0; i < scores.length; i++) {
+      if (scores[i] > best) {
+        second = best;
+        best = scores[i];
+        bestIdx = i;
+      } else if (scores[i] > second) {
+        second = scores[i];
+      }
+    }
+
+    var confident = false;
+    if (best >= 0.95 && best - second >= 0.05) confident = true;
+    else if (best >= 0.85 && best - second >= 0.12) confident = true;
+    else if (best >= 0.78 && best - second >= 0.2) confident = true;
+
+    return {
+      matchIndex: confident ? bestIdx : null,
+      heard: heard,
+      confident: confident,
+      score: best,
+      second: second,
+      bestIndex: bestIdx
+    };
+  }
+
+  function speechSupported() {
+    return typeof window !== "undefined" && !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  }
+
+  var api = {
+    QUESTIONS: QUESTIONS,
+    POINTS: POINTS,
+    LETTERS: LETTERS,
+    shuffle: shuffle,
+    buildRound: buildRound,
+    normalizeText: normalizeText,
+    stripLeadingThe: stripLeadingThe,
+    levenshtein: levenshtein,
+    similarity: similarity,
+    wordsToDigits: wordsToDigits,
+    digitsToWords: digitsToWords,
+    numberToWords: numberToWords,
+    matchLetter: matchLetter,
+    matchVoiceAnswer: matchVoiceAnswer,
+    speechSupported: speechSupported
+  };
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = api;
+  }
+  global.RoadTripTrivia = api;
+
+  if (typeof document === "undefined") return;
+
+  var state = {
+    mode: "alt",
+    length: 20,
+    names: ["Ernel", "Angela"],
+    deck: [],
+    index: 0,
+    scores: [0, 0],
+    correct: [0, 0],
+    turn: 0,
+    poolPicker: null,
+    answered: false,
+    recognition: null,
+    listening: false
+  };
+
+  var els = {};
+
+  function $(id) { return document.getElementById(id); }
+
+  function loadPrefs() {
+    try {
+      var raw = localStorage.getItem("roadTripTriviaPrefs");
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function savePrefs() {
+    try {
+      localStorage.setItem("roadTripTriviaPrefs", JSON.stringify({
+        names: state.names,
+        mode: state.mode,
+        length: state.length
+      }));
+    } catch (e) { /* optional */ }
+  }
+
+  function setPressed(ids, activeId) {
+    ids.forEach(function (id) {
+      $(id).setAttribute("aria-pressed", id === activeId ? "true" : "false");
+    });
+  }
+
+  function showScreen(id) {
+    ["screen-start", "screen-game", "screen-results"].forEach(function (s) {
+      $(s).hidden = s !== id;
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function stopListening() {
+    if (state.recognition && state.listening) {
+      try { state.recognition.abort(); } catch (e) { /* ignore */ }
+    }
+    state.listening = false;
+    if (els.btnMic) els.btnMic.classList.remove("listening");
+  }
+
+  function currentQuestion() {
+    return state.deck[state.index];
+  }
+
+  function updateScoreboard() {
+    els.boardName0.textContent = state.names[0];
+    els.boardName1.textContent = state.names[1];
+    els.boardPts0.textContent = String(state.scores[0]);
+    els.boardPts1.textContent = String(state.scores[1]);
+    els.boardCorrect0.textContent = state.correct[0] + " correct";
+    els.boardCorrect1.textContent = state.correct[1] + " correct";
+    els.progressLabel.textContent = (state.index + 1) + " / " + state.deck.length;
+    var active = null;
+    if (!state.answered) {
+      if (state.mode === "alt") active = state.turn;
+      else if (state.poolPicker !== null) active = state.poolPicker;
+    }
+    els.card0.classList.toggle("active", active === 0);
+    els.card1.classList.toggle("active", active === 1);
+  }
+
+  function answersUnlocked() {
+    if (state.answered) return false;
+    if (state.mode === "pool" && state.poolPicker === null) return false;
+    return true;
+  }
+
+  function setVoiceIdleMessage() {
+    if (!speechSupported()) return;
+    if (!answersUnlocked()) {
+      els.voiceStatus.textContent = "Pick who is answering, then you can use the mic.";
+    } else {
+      els.voiceStatus.textContent = "Tap the mic and say a letter or the answer.";
+    }
+    els.btnMic.disabled = !answersUnlocked();
+  }
+
+  function renderQuestion() {
+    var q = currentQuestion();
+    stopListening();
+    state.answered = false;
+    state.poolPicker = null;
+
+    els.diffBadge.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+    els.diffBadge.className = "badge " + q.difficulty;
+    els.catBadge.textContent = q.category;
+    var pts = q.points;
+    els.worthBadge.textContent = pts === 1 ? "Worth 1 point" : "Worth " + pts + " points";
+    els.questionText.textContent = q.question;
+
+    els.feedback.hidden = true;
+    els.feedback.innerHTML = "";
+    els.btnNext.hidden = true;
+    els.btnNext.textContent = state.index === state.deck.length - 1 ? "See results" : "Next question";
+
+    if (state.mode === "pool") {
+      els.buzzPanel.hidden = false;
+      els.buzz0.disabled = false;
+      els.buzz1.disabled = false;
+      els.buzz0.textContent = state.names[0];
+      els.buzz1.textContent = state.names[1];
+    } else {
+      els.buzzPanel.hidden = true;
+    }
+
+    els.answers.className = "answers";
+    els.answers.innerHTML = "";
+    q.options.forEach(function (text, i) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn-answer";
+      btn.dataset.index = String(i);
+      btn.disabled = state.mode === "pool";
+      btn.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span class="label"></span>';
+      btn.querySelector(".label").textContent = text;
+      btn.addEventListener("click", function () { submitAnswer(i); });
+      els.answers.appendChild(btn);
+    });
+
+    updateScoreboard();
+    setVoiceIdleMessage();
+  }
+
+  function pickPlayer(p) {
+    if (state.answered || state.mode !== "pool" || state.poolPicker !== null) return;
+    state.poolPicker = p;
+    els.buzz0.disabled = true;
+    els.buzz1.disabled = true;
+    var buttons = els.answers.querySelectorAll(".btn-answer");
+    for (var i = 0; i < buttons.length; i++) buttons[i].disabled = false;
+    updateScoreboard();
+    setVoiceIdleMessage();
+  }
+
+  function submitAnswer(index) {
+    if (state.answered) return;
+    if (state.mode === "pool" && state.poolPicker === null) return;
+    var q = currentQuestion();
+    if (index < 0 || index >= q.options.length) return;
+
+    state.answered = true;
+    stopListening();
+
+    var player = state.mode === "pool" ? state.poolPicker : state.turn;
+    var chosen = q.options[index];
+    var correct = chosen === q.answer;
+    if (correct) {
+      state.scores[player] += q.points;
+      state.correct[player] += 1;
+    }
+
+    var buttons = els.answers.querySelectorAll(".btn-answer");
+    els.answers.classList.add("locked");
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].disabled = true;
+      if (q.options[i] === q.answer) buttons[i].classList.add("correct");
+      if (i === index && !correct) buttons[i].classList.add("wrong");
+    }
+    if (state.mode === "pool") {
+      els.buzz0.disabled = true;
+      els.buzz1.disabled = true;
+    }
+
+    var name = state.names[player];
+    var verdict = correct
+      ? "Nice one, " + name + "!"
+      : "Not quite, " + name + ".";
+    els.feedback.hidden = false;
+    els.feedback.innerHTML =
+      '<div class="verdict ' + (correct ? "ok" : "no") + '"></div>' +
+      '<p class="explain"></p>';
+    els.feedback.querySelector(".verdict").textContent = verdict + (correct ? " +" + q.points + " " + (q.points === 1 ? "point" : "points") + "." : " The correct answer is " + q.answer + ".");
+    els.feedback.querySelector(".explain").textContent = q.explanation;
+    els.btnNext.hidden = false;
+    els.btnMic.disabled = true;
+    els.voiceStatus.textContent = "";
+    updateScoreboard();
+  }
+
+  function nextQuestion() {
+    if (!state.answered) return;
+    if (state.mode === "alt") state.turn = 1 - state.turn;
+    state.index += 1;
+    if (state.index >= state.deck.length) {
+      showResults();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function showResults() {
+    stopListening();
+    showScreen("screen-results");
+    els.resultName0.textContent = state.names[0];
+    els.resultName1.textContent = state.names[1];
+    els.resultPts0.textContent = String(state.scores[0]);
+    els.resultPts1.textContent = String(state.scores[1]);
+    els.resultCorrect0.textContent = state.correct[0] + " correct";
+    els.resultCorrect1.textContent = state.correct[1] + " correct";
+    els.resultCard0.classList.toggle("winner", state.scores[0] > state.scores[1]);
+    els.resultCard1.classList.toggle("winner", state.scores[1] > state.scores[0]);
+
+    var title, tag;
+    if (state.scores[0] > state.scores[1]) {
+      title = state.names[0] + " wins!";
+      tag = "A clean run to the border.";
+    } else if (state.scores[1] > state.scores[0]) {
+      title = state.names[1] + " wins!";
+      tag = "A clean run to the border.";
+    } else {
+      title = "It's a tie!";
+      tag = "Plenty of miles left for a rematch.";
+    }
+    els.resultsTitle.textContent = title;
+    els.resultsTagline.textContent = tag;
+  }
+
+  function readNames() {
+    var n0 = (els.name0.value || "").trim() || "Ernel";
+    var n1 = (els.name1.value || "").trim() || "Angela";
+    state.names = [n0, n1];
+  }
+
+  function startGame(reshuffleOnly) {
+    readNames();
+    savePrefs();
+    state.deck = buildRound(state.length);
+    state.index = 0;
+    state.scores = [0, 0];
+    state.correct = [0, 0];
+    state.turn = 0;
+    state.poolPicker = null;
+    state.answered = false;
+    showScreen("screen-game");
+    renderQuestion();
+  }
+
+  function onMicClick() {
+    if (!answersUnlocked() || !speechSupported()) return;
+    if (state.listening) {
+      stopListening();
+      setVoiceIdleMessage();
+      return;
+    }
+    var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var rec = new Rec();
+    rec.lang = "en-US";
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.maxAlternatives = 5;
+    state.recognition = rec;
+    state.listening = true;
+    els.btnMic.classList.add("listening");
+    els.voiceStatus.textContent = "Listening… say a letter or the answer.";
+
+    rec.onresult = function (event) {
+      state.listening = false;
+      els.btnMic.classList.remove("listening");
+      var alts = [];
+      if (event.results && event.results[0]) {
+        var result = event.results[0];
+        for (var i = 0; i < result.length; i++) {
+          if (result[i] && result[i].transcript) alts.push(result[i].transcript);
+        }
+      }
+      var q = currentQuestion();
+      var match = matchVoiceAnswer(alts, q.options);
+      if (match.confident && match.matchIndex !== null) {
+        els.voiceStatus.textContent = "Heard “" + match.heard + "” — locking that in.";
+        submitAnswer(match.matchIndex);
+      } else {
+        var heard = match.heard || (alts[0] || "");
+        els.voiceStatus.innerHTML = "";
+        var msg = document.createElement("span");
+        if (heard) {
+          msg.appendChild(document.createTextNode("We heard “"));
+          var strong = document.createElement("strong");
+          strong.textContent = heard;
+          msg.appendChild(strong);
+          msg.appendChild(document.createTextNode(",” but that didn't clearly match a choice. Try again, or just tap an answer."));
+        } else {
+          msg.textContent = "We couldn't match that to a choice. Try again, or just tap an answer.";
+        }
+        els.voiceStatus.appendChild(msg);
+      }
+    };
+
+    rec.onerror = function (event) {
+      state.listening = false;
+      els.btnMic.classList.remove("listening");
+      var err = event && event.error ? event.error : "";
+      var msg = "Something went wrong with the microphone. Try again, or just tap an answer.";
+      if (err === "no-speech") msg = "We didn't catch that. Try again, or just tap an answer.";
+      else if (err === "not-allowed" || err === "service-not-allowed") msg = "Microphone access is blocked. You can still tap an answer.";
+      else if (err === "network") msg = "A network error interrupted listening. Try again, or tap an answer.";
+      else if (err === "aborted") {
+        setVoiceIdleMessage();
+        return;
+      }
+      els.voiceStatus.textContent = msg;
+    };
+
+    rec.onend = function () {
+      if (state.listening) {
+        state.listening = false;
+        els.btnMic.classList.remove("listening");
+        if (!state.answered) {
+          els.voiceStatus.textContent = "We didn't catch that. Try again, or just tap an answer.";
+        }
+      }
+    };
+
+    try {
+      rec.start();
+    } catch (e) {
+      state.listening = false;
+      els.btnMic.classList.remove("listening");
+      els.voiceStatus.textContent = "Couldn't start the microphone. You can still tap an answer.";
+    }
+  }
+
+  function setupVoiceUi() {
+    if (!speechSupported()) {
+      els.btnMic.hidden = true;
+      els.btnMic.disabled = true;
+      els.voiceStatus.hidden = true;
+      els.voiceUnsupported.hidden = false;
+    } else {
+      els.btnMic.hidden = false;
+      els.voiceUnsupported.hidden = true;
+    }
+  }
+
+  function init() {
+    els.name0 = $("name0");
+    els.name1 = $("name1");
+    els.boardName0 = $("board-name0");
+    els.boardName1 = $("board-name1");
+    els.boardPts0 = $("board-pts0");
+    els.boardPts1 = $("board-pts1");
+    els.boardCorrect0 = $("board-correct0");
+    els.boardCorrect1 = $("board-correct1");
+    els.card0 = $("card0");
+    els.card1 = $("card1");
+    els.progressLabel = $("progress-label");
+    els.diffBadge = $("diff-badge");
+    els.catBadge = $("cat-badge");
+    els.worthBadge = $("worth-badge");
+    els.questionText = $("question-text");
+    els.buzzPanel = $("buzz-panel");
+    els.buzz0 = $("buzz0");
+    els.buzz1 = $("buzz1");
+    els.answers = $("answers");
+    els.btnMic = $("btn-mic");
+    els.voiceStatus = $("voice-status");
+    els.voiceUnsupported = $("voice-unsupported");
+    els.feedback = $("feedback");
+    els.btnNext = $("btn-next");
+    els.resultsTitle = $("results-title");
+    els.resultsTagline = $("results-tagline");
+    els.resultName0 = $("result-name0");
+    els.resultName1 = $("result-name1");
+    els.resultPts0 = $("result-pts0");
+    els.resultPts1 = $("result-pts1");
+    els.resultCorrect0 = $("result-correct0");
+    els.resultCorrect1 = $("result-correct1");
+    els.resultCard0 = $("result-card0");
+    els.resultCard1 = $("result-card1");
+
+    var prefs = loadPrefs();
+    if (prefs) {
+      if (prefs.names && prefs.names[0]) els.name0.value = prefs.names[0];
+      if (prefs.names && prefs.names[1]) els.name1.value = prefs.names[1];
+      if (prefs.mode === "alt" || prefs.mode === "pool") state.mode = prefs.mode;
+      if (prefs.length === 20 || prefs.length === 30 || prefs.length === 50) state.length = prefs.length;
+    }
+    setPressed(["mode-alt", "mode-pool"], state.mode === "pool" ? "mode-pool" : "mode-alt");
+    setPressed(["len-20", "len-30", "len-50"], "len-" + state.length);
+
+    $("mode-alt").addEventListener("click", function () {
+      state.mode = "alt";
+      setPressed(["mode-alt", "mode-pool"], "mode-alt");
+    });
+    $("mode-pool").addEventListener("click", function () {
+      state.mode = "pool";
+      setPressed(["mode-alt", "mode-pool"], "mode-pool");
+    });
+    $("len-20").addEventListener("click", function () {
+      state.length = 20;
+      setPressed(["len-20", "len-30", "len-50"], "len-20");
+    });
+    $("len-30").addEventListener("click", function () {
+      state.length = 30;
+      setPressed(["len-20", "len-30", "len-50"], "len-30");
+    });
+    $("len-50").addEventListener("click", function () {
+      state.length = 50;
+      setPressed(["len-20", "len-30", "len-50"], "len-50");
+    });
+    $("btn-start").addEventListener("click", function () { startGame(false); });
+    $("btn-rematch").addEventListener("click", function () { startGame(true); });
+    $("btn-new").addEventListener("click", function () {
+      stopListening();
+      showScreen("screen-start");
+    });
+    els.buzz0.addEventListener("click", function () { pickPlayer(0); });
+    els.buzz1.addEventListener("click", function () { pickPlayer(1); });
+    els.btnNext.addEventListener("click", nextQuestion);
+    els.btnMic.addEventListener("click", onMicClick);
+    setupVoiceUi();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})(typeof window !== "undefined" ? window : globalThis);
+  </script>
+</body>
+</html>
