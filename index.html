@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Road Trip Trivia — Washington to Canada</title>
   <style>
+
     :root {
       --bg0: #07110e;
       --bg1: #0d1c17;
@@ -469,6 +470,92 @@
       .score-card .pts { font-size: 1.4rem; }
       h1 { font-size: 1.55rem; }
     }
+  
+    /* Multi-player and redo additions — do not override v1 two-player theme */
+    .names.count-3 label:nth-child(3) { grid-column: 1 / -1; max-width: calc(50% - 0.4rem); }
+    @media (min-width: 640px) {
+      .names.count-3 { grid-template-columns: 1fr 1fr 1fr; }
+      .names.count-3 label:nth-child(3) { grid-column: auto; max-width: none; }
+      .names.count-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    }
+    .name-field[hidden] { display: none !important; }
+
+    .progress-line {
+      display: none;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 0.4rem;
+      margin-bottom: 0.55rem;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .progress-line.show { display: flex; }
+    .progress-line strong { color: var(--cream); }
+
+    .scoreboard.count-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .scoreboard.count-4 {
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (min-width: 700px) {
+      .scoreboard.count-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    }
+
+    .score-card.p2 .who, .score-card.p2 .pts { color: #f0c75e; }
+    .score-card.p3 .who, .score-card.p3 .pts { color: #c4a7ff; }
+    .score-card.p2.active { background: #3d3210; border-color: #f0c75e; }
+    .score-card.p3.active { background: #2a1d4a; border-color: #c4a7ff; }
+
+    .btn-buzz.p2 { background: #f0c75e; color: #1a1404; }
+    .btn-buzz.p3 { background: #c4a7ff; color: #1a1030; }
+    .buzz-row.count-3, .buzz-row.count-4 { grid-template-columns: 1fr 1fr; }
+    @media (min-width: 700px) {
+      .buzz-row.count-3 { grid-template-columns: 1fr 1fr 1fr; }
+      .buzz-row.count-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    }
+
+    .result-grid.count-3 { grid-template-columns: 1fr; }
+    @media (min-width: 640px) {
+      .result-grid.count-3 { grid-template-columns: 1fr 1fr 1fr; }
+      .result-grid.count-4 { grid-template-columns: 1fr 1fr; }
+    }
+    @media (min-width: 800px) {
+      .result-grid.count-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    }
+    .result-card.p2 .who { color: #f0c75e; }
+    .result-card.p3 .who { color: #c4a7ff; }
+    .result-card .place {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.2rem;
+    }
+
+    .btn-history {
+      display: block;
+      width: 100%;
+      min-height: 52px;
+      margin-top: 0.75rem;
+      border-radius: 14px;
+      background: transparent;
+      border: 2px dashed var(--line);
+      color: var(--muted);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .history-status {
+      text-align: center;
+      color: var(--gold);
+      font-size: 0.95rem;
+      min-height: 1.2em;
+      margin-top: 0.4rem;
+    }
+
   </style>
 </head>
 <body>
@@ -476,23 +563,45 @@
     <section id="screen-start" class="screen">
       <h1>🌲 Road Trip Trivia 🍁</h1>
       <p class="subtitle">Washington → Canada</p>
-      <p class="lede">A two-player quiz for the drive, built for Ernel and Angela.</p>
+      <p class="lede">A quiz for the drive, built for Ernel and Angela.</p>
 
       <div class="panel howto" id="howto">
-        <p>Ernel and Angela, this is your Washington-to-Canada road-trip trivia night. Pick your names, choose alternating turns or a shared buzz-in pool, and decide whether to play 20, 30, or all 50 questions.</p>
-        <p>Questions run easy to hard, and harder ones are worth more points; just tap a letter or hit the mic and say the answer (or say A, B, C, or D). After each guess you'll see the right answer and a short explanation, then move on. At the end you can rematch with a fresh shuffle or start a new game.</p>
+        <p>Ernel and Angela, this is your Washington-to-Canada road-trip trivia night, and Easton or Achilles can jump in too. Choose two, three, or four players, pick Adult or Family, then choose alternating turns or a shared buzz-in pool, and decide whether to play 20, 30, or 50 questions.</p>
+        <p>The questions are tougher now, running from moderately hard to genuinely hard, and harder ones are worth more points; tap a letter, or hit the mic and say the answer (or say A, B, C, or D). After each guess you'll see the right answer and a short explanation, then move on.</p>
+        <p>The game remembers questions you've already seen and shuffles a fresh set each time; at the end you can rematch or start a new game.</p>
       </div>
 
       <div class="panel">
-        <div class="names">
-          <label class="field">
+        <p class="section-label">Players</p>
+        <div class="choice-row" role="group" aria-label="Number of players">
+          <button type="button" class="seg" id="count-2" aria-pressed="true">2 players</button>
+          <button type="button" class="seg" id="count-3" aria-pressed="false">3 players</button>
+          <button type="button" class="seg" id="count-4" aria-pressed="false">4 players</button>
+        </div>
+
+        <div class="names" id="names">
+          <label class="field name-field" id="name-field-0">
             <span>Player 1</span>
             <input id="name0" type="text" maxlength="24" value="Ernel" autocomplete="off" spellcheck="false">
           </label>
-          <label class="field">
+          <label class="field name-field" id="name-field-1">
             <span>Player 2</span>
             <input id="name1" type="text" maxlength="24" value="Angela" autocomplete="off" spellcheck="false">
           </label>
+          <label class="field name-field" id="name-field-2" hidden>
+            <span>Player 3</span>
+            <input id="name2" type="text" maxlength="24" value="Easton" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="field name-field" id="name-field-3" hidden>
+            <span>Player 4</span>
+            <input id="name3" type="text" maxlength="24" value="Achilles" autocomplete="off" spellcheck="false">
+          </label>
+        </div>
+
+        <p class="section-label">Quiz style</p>
+        <div class="choice-row" role="group" aria-label="Quiz style">
+          <button type="button" class="seg" id="aud-adult" aria-pressed="true">Adult</button>
+          <button type="button" class="seg" id="aud-family" aria-pressed="false">Family</button>
         </div>
 
         <p class="section-label">How you play</p>
@@ -509,29 +618,20 @@
         </div>
 
         <button type="button" class="btn-primary" id="btn-start">Start the trip</button>
+        <button type="button" class="btn-history" id="btn-reset-history">Reset question history</button>
+        <p class="history-status" id="history-status"></p>
       </div>
     </section>
 
     <section id="screen-game" class="screen" hidden>
-      <div class="scoreboard" aria-live="polite">
-        <div class="score-card p0" id="card0">
-          <div class="who" id="board-name0">Ernel</div>
-          <div class="pts" id="board-pts0">0</div>
-          <div class="sub" id="board-correct0">0 correct</div>
-        </div>
-        <div class="progress-col">
-          <strong id="progress-label">1 / 20</strong>
-          Q
-        </div>
-        <div class="score-card p1" id="card1">
-          <div class="who" id="board-name1">Angela</div>
-          <div class="pts" id="board-pts1">0</div>
-          <div class="sub" id="board-correct1">0 correct</div>
-        </div>
+      <div class="progress-line" id="progress-line">
+        <span id="round-label"></span>
+        <strong id="progress-line-label"></strong>
       </div>
+      <div class="scoreboard" id="scoreboard" aria-live="polite"></div>
 
       <div class="q-meta">
-        <span class="badge" id="diff-badge">Easy</span>
+        <span class="badge" id="diff-badge">Moderate</span>
         <span class="badge cat" id="cat-badge">Geography</span>
         <span class="badge worth" id="worth-badge">Worth 1 point</span>
       </div>
@@ -540,10 +640,7 @@
 
       <div class="buzz-panel" id="buzz-panel" hidden>
         <h2>Who is answering?</h2>
-        <div class="buzz-row">
-          <button type="button" class="btn-buzz p0" id="buzz0">Ernel</button>
-          <button type="button" class="btn-buzz p1" id="buzz1">Angela</button>
-        </div>
+        <div class="buzz-row" id="buzz-row"></div>
       </div>
 
       <div class="answers" id="answers"></div>
@@ -563,18 +660,7 @@
         <h1 id="results-title">That's the end of the road</h1>
         <p class="tagline" id="results-tagline"></p>
       </div>
-      <div class="result-grid">
-        <div class="panel result-card p0" id="result-card0">
-          <div class="who" id="result-name0">Ernel</div>
-          <div class="pts" id="result-pts0">0</div>
-          <div class="sub" id="result-correct0">0 correct</div>
-        </div>
-        <div class="panel result-card p1" id="result-card1">
-          <div class="who" id="result-name1">Angela</div>
-          <div class="pts" id="result-pts1">0</div>
-          <div class="sub" id="result-correct1">0 correct</div>
-        </div>
-      </div>
+      <div class="result-grid" id="result-grid"></div>
       <button type="button" class="btn-primary" id="btn-rematch">Rematch</button>
       <button type="button" class="btn-secondary" id="btn-new">New game</button>
     </section>
@@ -585,59 +671,3968 @@
   "use strict";
 
   var QUESTIONS = [
-    { difficulty: "easy", category: "US History", question: "Who was the first President of the United States?", options: ["Thomas Jefferson", "George Washington", "John Adams", "Benjamin Franklin"], answer: "George Washington", explanation: "George Washington took office in 1789 after leading the Continental Army in the Revolutionary War." },
-    { difficulty: "easy", category: "Geography", question: "Which ocean lies on the west coast of Washington State?", options: ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"], answer: "Pacific Ocean", explanation: "Washington's coastline faces the Pacific, which also borders Oregon, California, and British Columbia." },
-    { difficulty: "easy", category: "Science", question: "What is H2O more commonly known as?", options: ["Salt", "Oxygen", "Hydrogen peroxide", "Water"], answer: "Water", explanation: "A water molecule is made of two hydrogen atoms and one oxygen atom." },
-    { difficulty: "easy", category: "Pop Culture", question: "Who played Iron Man in the Marvel Cinematic Universe films?", options: ["Chris Evans", "Chris Hemsworth", "Robert Downey Jr.", "Mark Ruffalo"], answer: "Robert Downey Jr.", explanation: "Robert Downey Jr. first appeared as Tony Stark in the 2008 film Iron Man." },
-    { difficulty: "easy", category: "General Knowledge", question: "How many days are in a leap year?", options: ["364", "365", "366", "367"], answer: "366", explanation: "A leap year adds February 29, making 366 days instead of the usual 365." },
-    { difficulty: "easy", category: "Pacific Northwest", question: "Which U.S. state is nicknamed the Evergreen State?", options: ["Oregon", "Washington", "Idaho", "Montana"], answer: "Washington", explanation: "Washington earned the nickname for its dense year-round forests of fir, hemlock, and cedar." },
-    { difficulty: "easy", category: "Canada", question: "What is the capital city of Canada?", options: ["Toronto", "Vancouver", "Montreal", "Ottawa"], answer: "Ottawa", explanation: "Ottawa, in Ontario, has been Canada's capital since the mid-19th century." },
-    { difficulty: "easy", category: "Fun Facts", question: "What is the only even prime number?", options: ["0", "1", "2", "4"], answer: "2", explanation: "Every even number greater than 2 can be divided by 2, so 2 is the only even prime." },
-    { difficulty: "easy", category: "European History", question: "In which city was the Eiffel Tower built?", options: ["London", "Rome", "Paris", "Berlin"], answer: "Paris", explanation: "The Eiffel Tower was completed in 1889 as the entrance arch for the Exposition Universelle in Paris." },
-    { difficulty: "easy", category: "US History", question: "In what year did the United States adopt the Declaration of Independence?", options: ["1776", "1787", "1789", "1812"], answer: "1776", explanation: "The Continental Congress adopted the Declaration of Independence on July 4, 1776." },
-    { difficulty: "easy", category: "Science", question: "How many planets are officially recognized in our solar system?", options: ["7", "8", "9", "10"], answer: "8", explanation: "Since Pluto was reclassified as a dwarf planet in 2006, the IAU recognizes eight planets." },
-    { difficulty: "easy", category: "Pop Culture", question: "What is the name of Harry Potter's owl?", options: ["Crookshanks", "Scabbers", "Fang", "Hedwig"], answer: "Hedwig", explanation: "Hedwig is the snowy owl Hagrid gives Harry for his eleventh birthday." },
-    { difficulty: "easy", category: "Geography", question: "What is the largest continent by land area?", options: ["Africa", "Asia", "North America", "Antarctica"], answer: "Asia", explanation: "Asia covers about 44 million square kilometers, more than any other continent." },
-    { difficulty: "easy", category: "Fun Facts", question: "How many colors are traditionally listed in a rainbow?", options: ["5", "6", "7", "8"], answer: "7", explanation: "The traditional sequence is red, orange, yellow, green, blue, indigo, and violet." },
-    { difficulty: "easy", category: "Geography", question: "Which U.S. state is the largest by area?", options: ["Texas", "California", "Alaska", "Montana"], answer: "Alaska", explanation: "Alaska is more than twice the size of Texas, the second-largest state." },
-    { difficulty: "easy", category: "European History", question: "Which wall in Germany was opened in 1989?", options: ["Hadrian's Wall", "The Berlin Wall", "The Great Wall", "The Antonine Wall"], answer: "The Berlin Wall", explanation: "The Berlin Wall, which had divided East and West Berlin since 1961, was opened on November 9, 1989." },
-    { difficulty: "easy", category: "Canada", question: "Which waterfall sits on the border of Ontario and New York?", options: ["Yosemite Falls", "Multnomah Falls", "Niagara Falls", "Victoria Falls"], answer: "Niagara Falls", explanation: "Niagara Falls is a group of waterfalls on the Niagara River shared by Canada and the United States." },
+  {
+    "id": "us-seward",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "Which U.S. Secretary of State negotiated the 1867 purchase of Alaska from Russia?",
+    "options": [
+      "John Hay",
+      "Hamilton Fish",
+      "William Seward",
+      "Dean Acheson"
+    ],
+    "answer": "William Seward",
+    "explanation": "Seward's $7.2 million deal with Russia was mocked as Seward's Folly until later gold and oil discoveries."
+  },
+  {
+    "id": "us-missouri-maine",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "The Missouri Compromise of 1820 admitted Missouri as a slave state and which other state as a free state?",
+    "options": [
+      "Vermont",
+      "Maine",
+      "Michigan",
+      "Wisconsin"
+    ],
+    "answer": "Maine",
+    "explanation": "Maine was split from Massachusetts and admitted as a free state to keep the Senate balance."
+  },
+  {
+    "id": "us-taft-court",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "Who is the only U.S. president who later served as Chief Justice of the United States?",
+    "options": [
+      "William Howard Taft",
+      "John Quincy Adams",
+      "Herbert Hoover",
+      "Grover Cleveland"
+    ],
+    "answer": "William Howard Taft",
+    "explanation": "Taft, president from 1909 to 1913, became Chief Justice in 1921 and served until 1930."
+  },
+  {
+    "id": "us-federalist-jay",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "Besides Alexander Hamilton and James Madison, who was the third principal author of The Federalist Papers?",
+    "options": [
+      "John Adams",
+      "John Jay",
+      "Thomas Jefferson",
+      "Aaron Burr"
+    ],
+    "answer": "John Jay",
+    "explanation": "Jay wrote five of the essays, including No. 2 through No. 5 and No. 64, before becoming the first Chief Justice."
+  },
+  {
+    "id": "us-paine-crisis",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "Which 1776 Thomas Paine pamphlet begins with the line, 'These are the times that try men's souls'?",
+    "options": [
+      "Common Sense",
+      "The American Crisis",
+      "Rights of Man",
+      "The Age of Reason"
+    ],
+    "answer": "The American Crisis",
+    "explanation": "Washington had The American Crisis read to his troops before the crossing of the Delaware."
+  },
+  {
+    "id": "us-corps-discovery",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "Lewis and Clark's 1804–1806 expedition was officially known as the Corps of what?",
+    "options": [
+      "Exploration",
+      "Discovery",
+      "the West",
+      "Liberty"
+    ],
+    "answer": "Discovery",
+    "explanation": "Jefferson commissioned the Corps of Discovery to explore the Louisiana Territory and seek a route to the Pacific."
+  },
+  {
+    "id": "us-19th-year",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "In what year was the 19th Amendment, guaranteeing women's suffrage nationwide, ratified?",
+    "options": [
+      "1913",
+      "1918",
+      "1920",
+      "1925"
+    ],
+    "answer": "1920",
+    "explanation": "Tennessee's ratification in August 1920 supplied the last vote needed to add the amendment to the Constitution."
+  },
+  {
+    "id": "us-gettysburg-address-year",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "In which year did Abraham Lincoln deliver the Gettysburg Address?",
+    "options": [
+      "1861",
+      "1863",
+      "1865",
+      "1862"
+    ],
+    "answer": "1863",
+    "explanation": "Lincoln spoke on November 19, 1863, at the dedication of the Soldiers' National Cemetery after the July battle."
+  },
+  {
+    "id": "us-bill-of-rights-year",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "In what year were the first ten amendments, known as the Bill of Rights, ratified?",
+    "options": [
+      "1776",
+      "1787",
+      "1791",
+      "1803"
+    ],
+    "answer": "1791",
+    "explanation": "The Bill of Rights was approved by Congress in 1789 and ratified by enough states in 1791."
+  },
+  {
+    "id": "us-arizona-memorial",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": true,
+    "question": "Which U.S. battleship, sunk at Pearl Harbor, is the centerpiece of a memorial in the harbor today?",
+    "options": [
+      "USS Missouri",
+      "USS Arizona",
+      "USS Oklahoma",
+      "USS Enterprise"
+    ],
+    "answer": "USS Arizona",
+    "explanation": "The USS Arizona Memorial sits over the wreck, which remains the resting place of more than a thousand crewmen."
+  },
+  {
+    "id": "us-maroon-colony",
+    "difficulty": "easy",
+    "category": "US History",
+    "family": false,
+    "question": "What name was given to the 1849 California gold seekers, a nickname taken from the year of the rush?",
+    "options": [
+      "Forty-Niners",
+      "Sooners",
+      "Argonauts of '48",
+      "Klondikers"
+    ],
+    "answer": "Forty-Niners",
+    "explanation": "The nickname refers to 1849, the year the California Gold Rush brought a mass of migrants west."
+  },
+  {
+    "id": "us-bretton-woods",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": true,
+    "question": "What 1944 New Hampshire conference created the framework for the International Monetary Fund and the World Bank?",
+    "options": [
+      "Yalta",
+      "Bretton Woods",
+      "Dumbarton Oaks",
+      "Potsdam"
+    ],
+    "answer": "Bretton Woods",
+    "explanation": "Delegates at Bretton Woods designed a postwar monetary system and the two Bretton Woods institutions."
+  },
+  {
+    "id": "us-emancipation-scope",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": true,
+    "question": "Lincoln's Emancipation Proclamation of 1863 immediately declared freedom for enslaved people in which places?",
+    "options": [
+      "All U.S. states and territories",
+      "The Union border states only",
+      "Confederate areas still in rebellion",
+      "The District of Columbia only"
+    ],
+    "answer": "Confederate areas still in rebellion",
+    "explanation": "It did not apply to slaveholding Union border states or to Confederate areas already under Union control."
+  },
+  {
+    "id": "us-shays",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": true,
+    "question": "Shays' Rebellion of 1786–87, an uprising of indebted farmers, took place in which state?",
+    "options": [
+      "Pennsylvania",
+      "Massachusetts",
+      "Virginia",
+      "New York"
+    ],
+    "answer": "Massachusetts",
+    "explanation": "The revolt, led by Daniel Shays, alarmed leaders and helped build support for a stronger federal constitution."
+  },
+  {
+    "id": "us-wilmot",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": false,
+    "question": "The 1846 Wilmot Proviso, which never became law, sought to ban slavery in territory taken from which country?",
+    "options": [
+      "Spain",
+      "Britain",
+      "Mexico",
+      "France"
+    ],
+    "answer": "Mexico",
+    "explanation": "David Wilmot proposed the ban during the Mexican–American War; the fight over it sharpened sectional conflict."
+  },
+  {
+    "id": "us-teapot",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": true,
+    "question": "The Teapot Dome scandal of the 1920s involved secret leases of federal oil reserves under which president?",
+    "options": [
+      "Woodrow Wilson",
+      "Warren G. Harding",
+      "Calvin Coolidge",
+      "Herbert Hoover"
+    ],
+    "answer": "Warren G. Harding",
+    "explanation": "Interior Secretary Albert Fall took bribes to lease reserves at Teapot Dome, Wyoming, and in California."
+  },
+  {
+    "id": "us-northwest-ordinance",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": false,
+    "question": "The Northwest Ordinance of 1787 banned slavery in the territory north of which river?",
+    "options": [
+      "The Ohio River",
+      "The Missouri River",
+      "The Mississippi River",
+      "The Potomac River"
+    ],
+    "answer": "The Ohio River",
+    "explanation": "The ordinance also set rules for statehood in the Old Northwest, including Ohio, Indiana, and Illinois."
+  },
+  {
+    "id": "us-mcculloch",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": false,
+    "question": "In McCulloch v. Maryland (1819), the Supreme Court held that a state could not tax which institution?",
+    "options": [
+      "The U.S. Post Office",
+      "The Second Bank of the United States",
+      "The Smithsonian Institution",
+      "West Point"
+    ],
+    "answer": "The Second Bank of the United States",
+    "explanation": "Chief Justice Marshall also affirmed implied federal powers under the Necessary and Proper Clause."
+  },
+  {
+    "id": "us-gadsden",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": false,
+    "question": "The 1853 Gadsden Purchase added land in present-day southern Arizona and New Mexico, bought from which country?",
+    "options": [
+      "Spain",
+      "Mexico",
+      "Texas",
+      "France"
+    ],
+    "answer": "Mexico",
+    "explanation": "The strip was bought for a southern transcontinental railroad route after the Mexican–American War."
+  },
+  {
+    "id": "us-dred-scott-chief",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": false,
+    "question": "Which Chief Justice wrote the 1857 Dred Scott v. Sandford decision?",
+    "options": [
+      "John Marshall",
+      "Roger B. Taney",
+      "Salmon P. Chase",
+      "Melville Fuller"
+    ],
+    "answer": "Roger B. Taney",
+    "explanation": "Taney's opinion held that African Americans could not be citizens and that Congress could not ban slavery in the territories."
+  },
+  {
+    "id": "us-lend-lease",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": true,
+    "question": "The 1941 Lend-Lease Act was designed mainly to supply wartime aid to which country first, before wider use?",
+    "options": [
+      "The Soviet Union",
+      "China",
+      "Britain",
+      "France"
+    ],
+    "answer": "Britain",
+    "explanation": "Roosevelt framed Lend-Lease to help Britain resist Nazi Germany; it was later extended to other Allies, including the USSR."
+  },
+  {
+    "id": "us-seneca-falls",
+    "difficulty": "medium",
+    "category": "US History",
+    "family": true,
+    "question": "The 1848 Seneca Falls Convention, a landmark women's rights meeting, was held in which state?",
+    "options": [
+      "Massachusetts",
+      "Pennsylvania",
+      "New York",
+      "Ohio"
+    ],
+    "answer": "New York",
+    "explanation": "Organized by Elizabeth Cady Stanton and Lucretia Mott, it issued the Declaration of Sentiments in Seneca Falls, N.Y."
+  },
+  {
+    "id": "us-ostend",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "The 1854 Ostend Manifesto argued that the United States should acquire which territory, by force if necessary?",
+    "options": [
+      "Hawaii",
+      "Cuba",
+      "Santo Domingo",
+      "the Danish West Indies"
+    ],
+    "answer": "Cuba",
+    "explanation": "U.S. diplomats in Europe drafted the dispatch; its leak outraged opponents of slavery's expansion."
+  },
+  {
+    "id": "us-credit-mobilier",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "The Crédit Mobilier scandal of the Grant era involved kickbacks tied to the construction of which railroad?",
+    "options": [
+      "The Great Northern",
+      "The Atchison, Topeka and Santa Fe",
+      "The Union Pacific",
+      "The New York Central"
+    ],
+    "answer": "The Union Pacific",
+    "explanation": "Crédit Mobilier of America, a construction company tied to Union Pacific insiders, bribed congressmen with stock."
+  },
+  {
+    "id": "us-zimmermann",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": true,
+    "question": "The 1917 Zimmermann Telegram promised Mexico the return of lost territory if it allied with Germany against the U.S. Who was Germany's foreign secretary who sent it?",
+    "options": [
+      "Theobald von Bethmann Hollweg",
+      "Arthur Zimmermann",
+      "Alfred von Tirpitz",
+      "Paul von Hindenburg"
+    ],
+    "answer": "Arthur Zimmermann",
+    "explanation": "British intelligence intercepted the telegram; its publication helped push the United States into World War I."
+  },
+  {
+    "id": "us-kellogg-briand",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "The 1928 Kellogg–Briand Pact, which renounced war as an instrument of national policy, was named in part for a U.S. Secretary of State and a foreign minister of which country?",
+    "options": [
+      "Britain",
+      "France",
+      "Germany",
+      "Italy"
+    ],
+    "answer": "France",
+    "explanation": "Frank B. Kellogg and French foreign minister Aristide Briand sponsored the pact, eventually signed by many nations."
+  },
+  {
+    "id": "us-insular-cases",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "The Supreme Court's Insular Cases, beginning in 1901, concerned the constitutional status of territories acquired after which war?",
+    "options": [
+      "The Mexican–American War",
+      "The Spanish–American War",
+      "World War I",
+      "The Civil War"
+    ],
+    "answer": "The Spanish–American War",
+    "explanation": "The Court held that full constitutional rights did not automatically extend to residents of the new island territories."
+  },
+  {
+    "id": "us-pinckney-treaty",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "Pinckney's Treaty of 1795, also called the Treaty of San Lorenzo, gave the United States navigation rights on the Mississippi and a deposit at New Orleans from which power?",
+    "options": [
+      "France",
+      "Britain",
+      "Spain",
+      "the Netherlands"
+    ],
+    "answer": "Spain",
+    "explanation": "Thomas Pinckney negotiated the treaty with Spain, which then controlled Louisiana and the river's mouth."
+  },
+  {
+    "id": "us-force-bill",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "The Force Bill of 1833 authorized the president to use the military to collect tariffs, during a crisis with which state?",
+    "options": [
+      "Virginia",
+      "South Carolina",
+      "Georgia",
+      "Alabama"
+    ],
+    "answer": "South Carolina",
+    "explanation": "It passed during the Nullification Crisis, after South Carolina declared the federal tariffs of 1828 and 1832 void."
+  },
+  {
+    "id": "us-webster-ashburton",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "The Webster–Ashburton Treaty of 1842 settled a border dispute between the United States and Britain, mainly in which region?",
+    "options": [
+      "Oregon Country",
+      "Maine and the Great Lakes",
+      "Alaska's panhandle",
+      "the San Juan Islands"
+    ],
+    "answer": "Maine and the Great Lakes",
+    "explanation": "It fixed the Maine–New Brunswick line and parts of the border through the Great Lakes after the Aroostook War tension."
+  },
+  {
+    "id": "us-mg-kitchen-cabinet",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "The 'Kitchen Cabinet' was an informal group of advisers especially associated with which president?",
+    "options": [
+      "Andrew Jackson",
+      "Abraham Lincoln",
+      "Theodore Roosevelt",
+      "Franklin D. Roosevelt"
+    ],
+    "answer": "Andrew Jackson",
+    "explanation": "Jackson relied on newspaper editors and personal allies more than some official cabinet members after the Eaton affair."
+  },
+  {
+    "id": "us-league-lodge",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": false,
+    "question": "Which Senate Republican leader was the chief opponent of U.S. ratification of the Treaty of Versailles and League of Nations membership?",
+    "options": [
+      "Robert La Follette",
+      "Henry Cabot Lodge",
+      "William Borah",
+      "Charles Evans Hughes"
+    ],
+    "answer": "Henry Cabot Lodge",
+    "explanation": "Lodge, chair of the Foreign Relations Committee, backed reservations that Wilson rejected, and the treaty failed in the Senate."
+  },
+  {
+    "id": "eu-hastings-king",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "King Harold II, killed at the Battle of Hastings in 1066, belonged to which Anglo-Saxon house and was defeated by which invader's forces?",
+    "options": [
+      "He defeated Sweyn of Denmark",
+      "He was defeated by William of Normandy",
+      "He was defeated by Macbeth of Scotland",
+      "He was defeated by Cnut the Great"
+    ],
+    "answer": "He was defeated by William of Normandy",
+    "explanation": "William of Normandy's victory at Hastings led to the Norman Conquest of England."
+  },
+  {
+    "id": "eu-magna-carta-king",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "Which English king was forced to seal Magna Carta at Runnymede in 1215?",
+    "options": [
+      "Richard I",
+      "John",
+      "Henry II",
+      "Edward I"
+    ],
+    "answer": "John",
+    "explanation": "Barons rebelled against King John's taxes and arbitrary rule; the charter limited the crown and later inspired constitutional ideas."
+  },
+  {
+    "id": "eu-berlin-wall-year",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "In which year was the Berlin Wall opened, leading to Germany's path to reunification?",
+    "options": [
+      "1987",
+      "1989",
+      "1991",
+      "1993"
+    ],
+    "answer": "1989",
+    "explanation": "East German authorities opened the crossings on November 9, 1989; official reunification followed on October 3, 1990."
+  },
+  {
+    "id": "eu-waterloo-year",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "In which year was Napoleon Bonaparte defeated at the Battle of Waterloo?",
+    "options": [
+      "1812",
+      "1813",
+      "1815",
+      "1814"
+    ],
+    "answer": "1815",
+    "explanation": "Wellington and Blücher defeated Napoleon in June 1815 in present-day Belgium, ending the Hundred Days."
+  },
+  {
+    "id": "eu-bastille-year",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "The storming of the Bastille, a traditional flashpoint of the French Revolution, occurred in which year?",
+    "options": [
+      "1776",
+      "1789",
+      "1793",
+      "1799"
+    ],
+    "answer": "1789",
+    "explanation": "Parisians stormed the prison fortress on July 14, 1789, now commemorated as France's national day."
+  },
+  {
+    "id": "eu-curies-fields",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "Marie Curie won Nobel Prizes in which two scientific fields?",
+    "options": [
+      "Physics and Medicine",
+      "Chemistry and Medicine",
+      "Physics and Chemistry",
+      "Peace and Physics"
+    ],
+    "answer": "Physics and Chemistry",
+    "explanation": "She shared the 1903 Physics prize and won the 1911 Chemistry prize for work on radioactivity, polonium, and radium."
+  },
+  {
+    "id": "eu-spanish-armada-year",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "In which year did the Spanish Armada sail against England and suffer its famous defeat?",
+    "options": [
+      "1492",
+      "1588",
+      "1605",
+      "1666"
+    ],
+    "answer": "1588",
+    "explanation": "Philip II's fleet failed to link up for an invasion; English harassment and storms wrecked much of the Armada."
+  },
+  {
+    "id": "eu-reformation-luther-year",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "In which year did Martin Luther traditionally nail, or otherwise present, his Ninety-five Theses in Wittenberg?",
+    "options": [
+      "1492",
+      "1517",
+      "1534",
+      "1555"
+    ],
+    "answer": "1517",
+    "explanation": "Luther's 1517 theses against indulgences are the conventional starting point of the Protestant Reformation."
+  },
+  {
+    "id": "eu-versailles-ended",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "The 1919 Treaty of Versailles formally ended the war between the Allies and which country?",
+    "options": [
+      "Austria-Hungary",
+      "Germany",
+      "The Ottoman Empire",
+      "Bulgaria"
+    ],
+    "answer": "Germany",
+    "explanation": "Separate treaties covered other Central Powers; Versailles placed heavy terms on Germany after World War I."
+  },
+  {
+    "id": "eu-colosseum-city",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "The Colosseum, or Flavian Amphitheatre, was built in which ancient city?",
+    "options": [
+      "Athens",
+      "Carthage",
+      "Rome",
+      "Alexandria"
+    ],
+    "answer": "Rome",
+    "explanation": "Construction began under Vespasian and was completed under Titus in 80 CE in the heart of Rome."
+  },
+  {
+    "id": "eu-hundred-years-sides",
+    "difficulty": "easy",
+    "category": "European History",
+    "family": true,
+    "question": "The Hundred Years' War was fought primarily between which two kingdoms?",
+    "options": [
+      "Spain and Portugal",
+      "England and France",
+      "Austria and Prussia",
+      "Sweden and Russia"
+    ],
+    "answer": "England and France",
+    "explanation": "The conflict, from 1337 to 1453, centered on claims to the French crown and control of French lands."
+  },
+  {
+    "id": "eu-peace-westphalia",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": true,
+    "question": "The Peace of Westphalia, which ended the Thirty Years' War, was signed in which year?",
+    "options": [
+      "1618",
+      "1648",
+      "1660",
+      "1713"
+    ],
+    "answer": "1648",
+    "explanation": "The treaties signed at Münster and Osnabrück redrew parts of the Holy Roman Empire and are often cited as a starting point for the modern state system."
+  },
+  {
+    "id": "eu-congress-vienna",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": true,
+    "question": "The Congress of Vienna, which redrew Europe after Napoleon, was chaired in practice by which Austrian statesman?",
+    "options": [
+      "Klemens von Metternich",
+      "Otto von Bismarck",
+      "Charles Maurice de Talleyrand",
+      "Viscount Castlereagh"
+    ],
+    "answer": "Klemens von Metternich",
+    "explanation": "Metternich hosted the 1814–15 congress; Talleyrand and Castlereagh were leading French and British delegates."
+  },
+  {
+    "id": "eu-schlieffen",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": true,
+    "question": "Germany's Schlieffen Plan at the start of World War I called for a rapid attack first against which country?",
+    "options": [
+      "Russia",
+      "France",
+      "Britain",
+      "Serbia"
+    ],
+    "answer": "France",
+    "explanation": "The plan aimed to defeat France quickly through Belgium before turning east against Russia; it failed at the Marne."
+  },
+  {
+    "id": "eu-glorious-rev",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": true,
+    "question": "In England's Glorious Revolution of 1688, which Protestant ruler was invited to take the throne from James II?",
+    "options": [
+      "William of Orange",
+      "Charles II",
+      "George I",
+      "Frederick of Prussia"
+    ],
+    "answer": "William of Orange",
+    "explanation": "William III and Mary II accepted the crown, and the 1689 Bill of Rights limited royal power."
+  },
+  {
+    "id": "eu-act-union-1707",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": true,
+    "question": "The 1707 Acts of Union united the kingdoms of England and which other country into Great Britain?",
+    "options": [
+      "Ireland",
+      "Scotland",
+      "Wales",
+      "Hanover"
+    ],
+    "answer": "Scotland",
+    "explanation": "The parliaments in London and Edinburgh passed the acts, creating the Kingdom of Great Britain."
+  },
+  {
+    "id": "eu-dreyfus",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": false,
+    "question": "The Dreyfus Affair, a late-19th-century political scandal over a wrongful treason conviction, took place in which country?",
+    "options": [
+      "Germany",
+      "France",
+      "Austria-Hungary",
+      "Italy"
+    ],
+    "answer": "France",
+    "explanation": "Captain Alfred Dreyfus, a Jewish officer, was framed; the case exposed antisemitism and divided the Third Republic."
+  },
+  {
+    "id": "eu-crimean-sides",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": false,
+    "question": "In the Crimean War of the 1850s, Britain and France fought mainly to check the expansion of which empire?",
+    "options": [
+      "The German Empire",
+      "The Russian Empire",
+      "The Austrian Empire",
+      "The Ottoman Empire"
+    ],
+    "answer": "The Russian Empire",
+    "explanation": "They allied with the Ottoman Empire after Russia pressed into Ottoman lands around the Black Sea."
+  },
+  {
+    "id": "eu-edict-nantes",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": false,
+    "question": "The Edict of Nantes, granted in 1598 by Henry IV, gave limited toleration to which group in France?",
+    "options": [
+      "Jansenists",
+      "Huguenots",
+      "Jesuits",
+      "Waldensians"
+    ],
+    "answer": "Huguenots",
+    "explanation": "It calmed the French Wars of Religion; Louis XIV revoked it in 1685 with the Edict of Fontainebleau."
+  },
+  {
+    "id": "eu-unification-cavour",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": false,
+    "question": "Which Piedmontese statesman was the principal political architect of Italian unification in the mid-19th century?",
+    "options": [
+      "Giuseppe Garibaldi",
+      "Count Camillo di Cavour",
+      "Giuseppe Mazzini",
+      "King Francis II"
+    ],
+    "answer": "Count Camillo di Cavour",
+    "explanation": "Cavour, prime minister of Sardinia-Piedmont, used diplomacy and war with French help; Garibaldi led campaigns in the south."
+  },
+  {
+    "id": "eu-yalta-big-three",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": true,
+    "question": "Besides Franklin D. Roosevelt and Winston Churchill, who was the third Allied leader at the 1945 Yalta Conference?",
+    "options": [
+      "Charles de Gaulle",
+      "Joseph Stalin",
+      "Harry S. Truman",
+      "Chiang Kai-shek"
+    ],
+    "answer": "Joseph Stalin",
+    "explanation": "The 'Big Three' met in Crimea to discuss the occupation of Germany, the United Nations, and the shape of postwar Europe."
+  },
+  {
+    "id": "eu-spanish-civil-year",
+    "difficulty": "medium",
+    "category": "European History",
+    "family": true,
+    "question": "The Spanish Civil War, which brought Francisco Franco to power, began in which year?",
+    "options": [
+      "1931",
+      "1936",
+      "1939",
+      "1941"
+    ],
+    "answer": "1936",
+    "explanation": "The war ran from 1936 to 1939; Franco's Nationalists defeated the Republic with aid from Fascist Italy and Nazi Germany."
+  },
+  {
+    "id": "eu-pragmatic-sanction",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": false,
+    "question": "The Pragmatic Sanction of 1713 was issued by Emperor Charles VI mainly to secure the succession of which daughter?",
+    "options": [
+      "Maria Theresa",
+      "Marie Antoinette",
+      "Catherine the Great",
+      "Elizabeth of Russia"
+    ],
+    "answer": "Maria Theresa",
+    "explanation": "European powers later challenged her inheritance, helping spark the War of the Austrian Succession."
+  },
+  {
+    "id": "eu-defenestration",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": false,
+    "question": "The 1618 Defenestration of Prague, a trigger for the Thirty Years' War, involved Protestant nobles throwing officials from a window in which castle complex?",
+    "options": [
+      "Hradčany / Prague Castle",
+      "Schönbrunn",
+      "Wawel",
+      "the Hofburg"
+    ],
+    "answer": "Hradčany / Prague Castle",
+    "explanation": "The victims survived the fall; the act marked Bohemia's revolt against Habsburg rule."
+  },
+  {
+    "id": "eu-treaty-utrecht",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": true,
+    "question": "The Treaties of Utrecht (1713) ended which major European war?",
+    "options": [
+      "The Thirty Years' War",
+      "The War of the Spanish Succession",
+      "The Seven Years' War",
+      "The War of the Austrian Succession"
+    ],
+    "answer": "The War of the Spanish Succession",
+    "explanation": "They confirmed a Bourbon king in Spain but blocked a union of the French and Spanish crowns and redrew colonial holdings."
+  },
+  {
+    "id": "eu-battle-lepanto",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": true,
+    "question": "The 1571 Battle of Lepanto, a major naval victory for the Holy League, was fought against which empire?",
+    "options": [
+      "The Safavid Empire",
+      "The Ottoman Empire",
+      "The Mughal Empire",
+      "The Empire of Morocco"
+    ],
+    "answer": "The Ottoman Empire",
+    "explanation": "A coalition fleet led by Spain and Venice defeated the Ottomans in the Gulf of Patras, checking their naval push in the west."
+  },
+  {
+    "id": "eu-great-schism-year",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": false,
+    "question": "The traditional date for the East–West Schism that divided the Chalcedonian Church into Catholic and Eastern Orthodox branches is which year?",
+    "options": [
+      "800",
+      "1054",
+      "1204",
+      "1453"
+    ],
+    "answer": "1054",
+    "explanation": "Mutual excommunications in 1054 between Rome and Constantinople are the conventional marker, though the split had long roots."
+  },
+  {
+    "id": "eu-pyrrhic",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": false,
+    "question": "Pyrrhus of Epirus, whose costly victories coined 'Pyrrhic victory,' fought his famous Italian campaigns mainly against which ancient republic?",
+    "options": [
+      "Carthage",
+      "Rome",
+      "Syracuse",
+      "Macedon"
+    ],
+    "answer": "Rome",
+    "explanation": "He won at Heraclea and Asculum in the early 3rd century BCE but suffered such losses that he could not finish the war."
+  },
+  {
+    "id": "eu-albigensian",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": false,
+    "question": "The Albigensian Crusade of the 13th century was launched against heretics, often called Cathars, mainly in which region of France?",
+    "options": [
+      "Normandy",
+      "Languedoc",
+      "Brittany",
+      "Alsace"
+    ],
+    "answer": "Languedoc",
+    "explanation": "Pope Innocent III called the crusade; it crushed Cathar communities in the south and extended French royal power there."
+  },
+  {
+    "id": "eu-diet-worms",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": true,
+    "question": "At the 1521 Diet of Worms, Martin Luther refused to recant before which Holy Roman Emperor?",
+    "options": [
+      "Charles V",
+      "Maximilian I",
+      "Ferdinand I",
+      "Rudolf II"
+    ],
+    "answer": "Charles V",
+    "explanation": "The diet issued the Edict of Worms, outlawing Luther, who was then sheltered at the Wartburg by Frederick the Wise."
+  },
+  {
+    "id": "eu-night-long-knives",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": false,
+    "question": "The 1934 Night of the Long Knives was a purge ordered by Adolf Hitler mainly against the leadership of which organization?",
+    "options": [
+      "The Gestapo",
+      "The SA (Sturmabteilung)",
+      "The Wehrmacht general staff",
+      "The Abwehr"
+    ],
+    "answer": "The SA (Sturmabteilung)",
+    "explanation": "Ernst Röhm and other SA leaders were killed, along with some conservative opponents, consolidating Hitler's and the SS's power."
+  },
+  {
+    "id": "eu-kongress-polen",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": false,
+    "question": "After the Congress of Vienna, the semi-autonomous 'Congress Poland' was created in personal union with which empire?",
+    "options": [
+      "Austria",
+      "Prussia",
+      "Russia",
+      "the Ottoman Empire"
+    ],
+    "answer": "Russia",
+    "explanation": "The Kingdom of Poland, with the Russian tsar as king, had a constitution at first but lost autonomy after later uprisings."
+  },
+  {
+    "id": "wh-fall-constantinople",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "In which year did Ottoman forces under Mehmed II capture Constantinople, ending the Byzantine Empire?",
+    "options": [
+      "1204",
+      "1453",
+      "1492",
+      "1529"
+    ],
+    "answer": "1453",
+    "explanation": "The fall of the city, later called Istanbul, is a conventional end point for the medieval Byzantine state."
+  },
+  {
+    "id": "wh-mansa-musa",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "Mansa Musa, famous for his 14th-century pilgrimage and gold, ruled which West African empire?",
+    "options": [
+      "Ghana",
+      "Mali",
+      "Songhai",
+      "Benin"
+    ],
+    "answer": "Mali",
+    "explanation": "Musa's hajj in 1324 displayed Mali's wealth; he is often ranked among the richest people in history."
+  },
+  {
+    "id": "wh-haitian-toussaint",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "Which leader is most closely associated with the early success of the Haitian Revolution against French colonial rule?",
+    "options": [
+      "Jean-Jacques Dessalines",
+      "Toussaint Louverture",
+      "Henri Christophe",
+      "Alexandre Pétion"
+    ],
+    "answer": "Toussaint Louverture",
+    "explanation": "Louverture led enslaved people to victory and governed Saint-Domingue; Dessalines later declared Haiti's independence in 1804."
+  },
+  {
+    "id": "wh-meiji-year",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "In which year did Japan's Meiji Restoration formally restore imperial rule and launch rapid modernization?",
+    "options": [
+      "1853",
+      "1868",
+      "1895",
+      "1905"
+    ],
+    "answer": "1868",
+    "explanation": "The Tokugawa shogunate fell in 1868; the Meiji government then industrialized and centralized the state."
+  },
+  {
+    "id": "wh-puyi",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "Who was the last emperor of China, abdicating as a child after the 1911 revolution?",
+    "options": [
+      "Guangxu",
+      "Puyi",
+      "Kangxi",
+      "Yongzheng"
+    ],
+    "answer": "Puyi",
+    "explanation": "Puyi, the Xuantong emperor of the Qing dynasty, later briefly served as a Japanese puppet ruler in Manchukuo."
+  },
+  {
+    "id": "wh-nkrumah",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "Who became the first prime minister and later first president of independent Ghana?",
+    "options": [
+      "Jomo Kenyatta",
+      "Kwame Nkrumah",
+      "Julius Nyerere",
+      "Patrice Lumumba"
+    ],
+    "answer": "Kwame Nkrumah",
+    "explanation": "Nkrumah led the Gold Coast to independence in 1957, the first sub-Saharan African colony of Britain to do so."
+  },
+  {
+    "id": "wh-rosetta",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "The Rosetta Stone, key to deciphering Egyptian hieroglyphs, repeats the same text in hieroglyphic, Demotic, and which other language?",
+    "options": [
+      "Latin",
+      "Aramaic",
+      "Greek",
+      "Persian"
+    ],
+    "answer": "Greek",
+    "explanation": "The Greek inscription let scholars, notably Jean-François Champollion, crack the hieroglyphic script."
+  },
+  {
+    "id": "wh-tenochtitlan",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "Tenochtitlan, captured by Spanish forces in 1521, was the capital of which empire?",
+    "options": [
+      "Inca",
+      "Maya",
+      "Aztec",
+      "Olmec"
+    ],
+    "answer": "Aztec",
+    "explanation": "The island capital in Lake Texcoco is now the historic center of Mexico City."
+  },
+  {
+    "id": "wh-partition-1947",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "The 1947 Partition created India and which other independent dominion from British India?",
+    "options": [
+      "Bangladesh",
+      "Pakistan",
+      "Sri Lanka",
+      "Burma"
+    ],
+    "answer": "Pakistan",
+    "explanation": "Pakistan was created as a separate state for many of British India's Muslims; Bangladesh later became independent from Pakistan in 1971."
+  },
+  {
+    "id": "wh-opium-nanking",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "The 1842 Treaty of Nanking, which ceded Hong Kong Island to Britain, ended which war?",
+    "options": [
+      "The Boxer Rebellion",
+      "The First Opium War",
+      "The Second Opium War",
+      "The Sino-Japanese War"
+    ],
+    "answer": "The First Opium War",
+    "explanation": "China was forced to open treaty ports and grant Britain an indemnity and the island of Hong Kong."
+  },
+  {
+    "id": "wh-suez-1956",
+    "difficulty": "easy",
+    "category": "World History",
+    "family": true,
+    "question": "The 1956 Suez Crisis began after Egypt's government nationalized the Suez Canal under which leader?",
+    "options": [
+      "Anwar Sadat",
+      "Gamal Abdel Nasser",
+      "King Farouk",
+      "Hosni Mubarak"
+    ],
+    "answer": "Gamal Abdel Nasser",
+    "explanation": "Britain, France, and Israel invaded; U.S. and Soviet pressure, and a U.N. force, ended the intervention."
+  },
+  {
+    "id": "wh-berlin-conference",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": true,
+    "question": "The 1884–85 Berlin Conference is best known for setting ground rules for the colonial partition of which continent?",
+    "options": [
+      "Asia",
+      "Africa",
+      "South America",
+      "Oceania"
+    ],
+    "answer": "Africa",
+    "explanation": "European powers negotiated claims in Africa, accelerating the so-called Scramble without African representation."
+  },
+  {
+    "id": "wh-atahualpa",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": true,
+    "question": "Which Inca emperor was captured at Cajamarca in 1532 by Francisco Pizarro's forces?",
+    "options": [
+      "Huayna Capac",
+      "Atahualpa",
+      "Manco Inca",
+      "Túpac Amaru I"
+    ],
+    "answer": "Atahualpa",
+    "explanation": "Atahualpa had just won a civil war against his brother Huáscar; he was later executed despite a huge ransom."
+  },
+  {
+    "id": "wh-adwa",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": true,
+    "question": "At the 1896 Battle of Adwa, Ethiopian forces defeated an invading army from which European country?",
+    "options": [
+      "Britain",
+      "France",
+      "Italy",
+      "Germany"
+    ],
+    "answer": "Italy",
+    "explanation": "Emperor Menelik II's victory preserved Ethiopia's independence and became a symbol of anticolonial resistance."
+  },
+  {
+    "id": "wh-taiping-leader",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": false,
+    "question": "Hong Xiuquan, who claimed to be the younger brother of Jesus, led which massive 19th-century Chinese rebellion?",
+    "options": [
+      "The Boxer Rebellion",
+      "The Taiping Rebellion",
+      "The Nian Rebellion",
+      "The An Lushan Rebellion"
+    ],
+    "answer": "The Taiping Rebellion",
+    "explanation": "The Taiping Civil War (1850–1864) against the Qing dynasty was one of the deadliest conflicts in history."
+  },
+  {
+    "id": "wh-an-lushan",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": false,
+    "question": "The An Lushan Rebellion of the 8th century was a devastating revolt against which Chinese dynasty?",
+    "options": [
+      "Han",
+      "Tang",
+      "Song",
+      "Ming"
+    ],
+    "answer": "Tang",
+    "explanation": "General An Lushan's revolt (755–763) badly weakened the Tang and caused enormous loss of life."
+  },
+  {
+    "id": "wh-boxer",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": true,
+    "question": "The Boxer Rebellion of 1899–1901, aimed at expelling foreign influence, broke out in which country?",
+    "options": [
+      "Japan",
+      "China",
+      "Korea",
+      "Vietnam"
+    ],
+    "answer": "China",
+    "explanation": "The Righteous and Harmonious Fists rose against foreigners and Christians; an eight-nation alliance occupied Beijing."
+  },
+  {
+    "id": "wh-bolivar-death",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": false,
+    "question": "Simón Bolívar died in 1830 in which city on the Caribbean coast of present-day Colombia?",
+    "options": [
+      "Caracas",
+      "Bogotá",
+      "Santa Marta",
+      "Quito"
+    ],
+    "answer": "Santa Marta",
+    "explanation": "After resigning as president of Gran Colombia, Bolívar died of tuberculosis in Santa Marta."
+  },
+  {
+    "id": "wh-dien-bien-phu",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": true,
+    "question": "The 1954 Battle of Dien Bien Phu was a decisive defeat for which colonial power in Vietnam?",
+    "options": [
+      "The United States",
+      "France",
+      "Japan",
+      "China"
+    ],
+    "answer": "France",
+    "explanation": "Viet Minh forces under Vo Nguyen Giap overran the French garrison, leading to the Geneva Accords and France's withdrawal."
+  },
+  {
+    "id": "wh-suleiman-vienna",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": false,
+    "question": "Suleiman the Magnificent's 1529 campaign into Central Europe is best known for a failed siege of which city?",
+    "options": [
+      "Prague",
+      "Vienna",
+      "Budapest",
+      "Kraków"
+    ],
+    "answer": "Vienna",
+    "explanation": "The first Ottoman siege of Vienna marked the high-water mark of Ottoman expansion toward the German lands."
+  },
+  {
+    "id": "wh-hammurabi-city",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": true,
+    "question": "Hammurabi, author of a famous law code, was a king of which Mesopotamian state?",
+    "options": [
+      "Assyria",
+      "Sumer",
+      "Babylon",
+      "Phoenicia"
+    ],
+    "answer": "Babylon",
+    "explanation": "Hammurabi ruled in the 18th century BCE; his stele of laws was later found at Susa and is now in the Louvre."
+  },
+  {
+    "id": "wh-maurya-founder",
+    "difficulty": "medium",
+    "category": "World History",
+    "family": false,
+    "question": "Who founded the Maurya Empire in ancient India, with later rule associated with Ashoka?",
+    "options": [
+      "Chandragupta Maurya",
+      "Bindusara",
+      "Harsha",
+      "Chandragupta II"
+    ],
+    "answer": "Chandragupta Maurya",
+    "explanation": "Chandragupta founded the empire in the late 4th century BCE; his grandson Ashoka later promoted Buddhism after the Kalinga war."
+  },
+  {
+    "id": "wh-khmer-angkor",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": true,
+    "question": "Angkor, site of Angkor Wat, was the capital of which Southeast Asian empire?",
+    "options": [
+      "The Srivijaya Empire",
+      "The Khmer Empire",
+      "The Majapahit Empire",
+      "The Ayutthaya Kingdom"
+    ],
+    "answer": "The Khmer Empire",
+    "explanation": "The Khmer Empire flourished from the 9th to the 15th centuries in and around present-day Cambodia."
+  },
+  {
+    "id": "wh-qhapaq-nan",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": false,
+    "question": "Qhapaq Ñan is the name for the extensive road system built by which Andean empire?",
+    "options": [
+      "Tiwanaku",
+      "Inca",
+      "Moche",
+      "Chimu"
+    ],
+    "answer": "Inca",
+    "explanation": "The network ran along the Andes and is a UNESCO World Heritage listing as the Andean Road System."
+  },
+  {
+    "id": "wh-great-zimbabwe",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": true,
+    "question": "The stone city of Great Zimbabwe was a major medieval capital in which present-day country?",
+    "options": [
+      "South Africa",
+      "Zimbabwe",
+      "Kenya",
+      "Ethiopia"
+    ],
+    "answer": "Zimbabwe",
+    "explanation": "The site, associated with the Kingdom of Zimbabwe, later gave its name to the modern country."
+  },
+  {
+    "id": "wh-safavid-center",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": false,
+    "question": "The Safavid Empire, a major early modern Shia power, was centered mainly in which region?",
+    "options": [
+      "Anatolia",
+      "Persia (Iran)",
+      "the Arabian Peninsula",
+      "Central Asia only"
+    ],
+    "answer": "Persia (Iran)",
+    "explanation": "Founded by Shah Ismail I in 1501, the Safavids made Twelver Shiism the state religion of Iran."
+  },
+  {
+    "id": "wh-cetshwayo",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": false,
+    "question": "Cetshwayo kaMpande was the Zulu king at the 1879 Battle of Isandlwana, a defeat for which colonial army?",
+    "options": [
+      "The Portuguese",
+      "The British",
+      "The Dutch",
+      "The Germans"
+    ],
+    "answer": "The British",
+    "explanation": "Zulu forces overran a British camp at Isandlwana; Britain later won the Anglo-Zulu War after reinforcing."
+  },
+  {
+    "id": "wh-hatshepsut-period",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": false,
+    "question": "Hatshepsut, one of ancient Egypt's most powerful female pharaohs, ruled during which period?",
+    "options": [
+      "The Old Kingdom",
+      "The Middle Kingdom",
+      "The New Kingdom",
+      "The Ptolemaic period"
+    ],
+    "answer": "The New Kingdom",
+    "explanation": "She ruled in the 18th Dynasty, famous for her mortuary temple at Deir el-Bahri and a trading expedition to Punt."
+  },
+  {
+    "id": "wh-panmunjom",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": false,
+    "question": "The 1953 Korean War armistice was signed at which village on the dividing line?",
+    "options": [
+      "Kaesong",
+      "Panmunjom",
+      "Inchon",
+      "Pusan"
+    ],
+    "answer": "Panmunjom",
+    "explanation": "The agreement ended major combat and created the Demilitarized Zone; no final peace treaty has followed."
+  },
+  {
+    "id": "wh-tordesillas",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": true,
+    "question": "The 1494 Treaty of Tordesillas divided non-European lands for colonization between Spain and which other kingdom?",
+    "options": [
+      "France",
+      "Portugal",
+      "England",
+      "the Netherlands"
+    ],
+    "answer": "Portugal",
+    "explanation": "A papal line of demarcation was adjusted at Tordesillas, later helping explain Portugal's claim to Brazil."
+  },
+  {
+    "id": "wh-shogun-tokugawa-city",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": false,
+    "question": "The Tokugawa shogunate, beginning in 1603, placed its government at Edo, which is today known as which city?",
+    "options": [
+      "Kyoto",
+      "Osaka",
+      "Tokyo",
+      "Nagasaki"
+    ],
+    "answer": "Tokyo",
+    "explanation": "Edo was renamed Tokyo, or 'eastern capital,' when the Meiji government moved the emperor there in 1868."
+  },
+  {
+    "id": "wh-balfour",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": true,
+    "question": "The 1917 Balfour Declaration was a British statement of support for a national home for the Jewish people in which territory?",
+    "options": [
+      "Egypt",
+      "Cyprus",
+      "Palestine",
+      "Iraq"
+    ],
+    "answer": "Palestine",
+    "explanation": "Foreign Secretary Arthur Balfour addressed the letter to Lord Rothschild during World War I, while the area was still Ottoman."
+  },
+  {
+    "id": "geo-canberra-territory",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "Canberra, the capital of Australia, is located in which federal territory?",
+    "options": [
+      "Northern Territory",
+      "Australian Capital Territory",
+      "Jervis Bay Territory",
+      "Victoria"
+    ],
+    "answer": "Australian Capital Territory",
+    "explanation": "The purpose-built capital sits in the Australian Capital Territory, inland from Sydney and the coast."
+  },
+  {
+    "id": "geo-pyrenees",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "Which mountain range forms most of the border between France and Spain?",
+    "options": [
+      "The Alps",
+      "The Apennines",
+      "The Pyrenees",
+      "The Cantabrian Mountains"
+    ],
+    "answer": "The Pyrenees",
+    "explanation": "The Pyrenees run from the Bay of Biscay to the Mediterranean; Andorra also sits in the range."
+  },
+  {
+    "id": "geo-nile-sea",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "The Nile River empties into which sea?",
+    "options": [
+      "The Red Sea",
+      "The Mediterranean Sea",
+      "The Black Sea",
+      "The Arabian Sea"
+    ],
+    "answer": "The Mediterranean Sea",
+    "explanation": "The Nile delta is in northern Egypt, on the Mediterranean; the river's sources lie far to the south."
+  },
+  {
+    "id": "geo-andes-continent",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "The Andes, the world's longest continental mountain range, run along which continent?",
+    "options": [
+      "Africa",
+      "Asia",
+      "South America",
+      "North America"
+    ],
+    "answer": "South America",
+    "explanation": "The Andes stretch along the Pacific side of South America, from Venezuela to southern Chile and Argentina."
+  },
+  {
+    "id": "geo-strait-gibraltar",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "The Strait of Gibraltar separates Spain from which African country?",
+    "options": [
+      "Algeria",
+      "Morocco",
+      "Tunisia",
+      "Libya"
+    ],
+    "answer": "Morocco",
+    "explanation": "The narrow strait connects the Atlantic to the Mediterranean and separates Europe from North Africa."
+  },
+  {
+    "id": "geo-caspian",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "What is the world's largest inland body of water, often called a sea, lying between Europe and Asia?",
+    "options": [
+      "The Black Sea",
+      "The Caspian Sea",
+      "Lake Superior",
+      "the Aral Sea"
+    ],
+    "answer": "The Caspian Sea",
+    "explanation": "The Caspian is a landlocked salt lake bordered by Russia, Iran, and several other countries."
+  },
+  {
+    "id": "geo-sahara-continent",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "The Sahara, the world's largest hot desert, is located on which continent?",
+    "options": [
+      "Asia",
+      "Australia",
+      "Africa",
+      "North America"
+    ],
+    "answer": "Africa",
+    "explanation": "The Sahara covers much of North Africa, from the Atlantic to the Red Sea."
+  },
+  {
+    "id": "geo-ganges-country",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "The Ganges River, sacred in Hinduism, flows mainly through which country before reaching the Bay of Bengal?",
+    "options": [
+      "Pakistan",
+      "India",
+      "Sri Lanka",
+      "Nepal only"
+    ],
+    "answer": "India",
+    "explanation": "It rises in the Himalayas and crosses the North Indian plain; its delta is shared with Bangladesh."
+  },
+  {
+    "id": "geo-ural-divide",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "Which mountain range is commonly treated as part of the conventional boundary between Europe and Asia?",
+    "options": [
+      "The Caucasus only",
+      "The Urals",
+      "The Carpathians",
+      "The Elburz"
+    ],
+    "answer": "The Urals",
+    "explanation": "The Ural Mountains and Ural River are widely used, with the Caucasus often also cited, as Europe-Asia divides."
+  },
+  {
+    "id": "geo-amazon-ocean",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "The Amazon River empties into which ocean?",
+    "options": [
+      "The Pacific Ocean",
+      "The Atlantic Ocean",
+      "The Indian Ocean",
+      "The Southern Ocean"
+    ],
+    "answer": "The Atlantic Ocean",
+    "explanation": "The Amazon's mouth is on the northern coast of Brazil, on the Atlantic."
+  },
+  {
+    "id": "geo-baikal",
+    "difficulty": "easy",
+    "category": "Geography",
+    "family": true,
+    "question": "Lake Baikal, the world's deepest freshwater lake, is located in which country?",
+    "options": [
+      "Mongolia",
+      "China",
+      "Russia",
+      "Kazakhstan"
+    ],
+    "answer": "Russia",
+    "explanation": "Baikal lies in Siberia and holds more fresh water than any other single lake."
+  },
+  {
+    "id": "geo-atakama",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "The Atacama Desert, one of the driest places on Earth, lies mainly along the coast of which country?",
+    "options": [
+      "Peru",
+      "Chile",
+      "Argentina",
+      "Bolivia"
+    ],
+    "answer": "Chile",
+    "explanation": "The Atacama occupies northern Chile between the Pacific and the Andes, with some rain-shadow and current effects."
+  },
+  {
+    "id": "geo-danube-sea",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "The Danube River empties into which sea?",
+    "options": [
+      "The Adriatic Sea",
+      "The Aegean Sea",
+      "The Black Sea",
+      "The Baltic Sea"
+    ],
+    "answer": "The Black Sea",
+    "explanation": "Europe's second-longest river ends in a delta on Romania's and Ukraine's Black Sea coast."
+  },
+  {
+    "id": "geo-tropic-cancer",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "The Tropic of Cancer is a line of latitude in which hemisphere, marking the northern limit of the sun's vertical rays at solstice?",
+    "options": [
+      "The Southern Hemisphere",
+      "The Northern Hemisphere",
+      "It runs along the equator",
+      "It is a longitude line"
+    ],
+    "answer": "The Northern Hemisphere",
+    "explanation": "It sits at about 23.5 degrees north; the Tropic of Capricorn is the southern counterpart."
+  },
+  {
+    "id": "geo-mekong-delta-country",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "The Mekong River's large delta, a major rice-growing region, is primarily in which country?",
+    "options": [
+      "Thailand",
+      "Cambodia",
+      "Vietnam",
+      "Laos"
+    ],
+    "answer": "Vietnam",
+    "explanation": "The Mekong flows through several countries and fans out in southern Vietnam into the South China Sea."
+  },
+  {
+    "id": "geo-kalahari",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "The Kalahari Desert covers large parts of Botswana and extends into Namibia and which other country?",
+    "options": [
+      "Kenya",
+      "South Africa",
+      "Mozambique",
+      "Tanzania"
+    ],
+    "answer": "South Africa",
+    "explanation": "It is a large sand basin, more a semi-arid savanna in places than a barren erg, in southern Africa."
+  },
+  {
+    "id": "geo-straight-magellan",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "The Strait of Magellan, a historic shipping passage, runs through the southern tip of which continent?",
+    "options": [
+      "Africa",
+      "Australia",
+      "South America",
+      "Antarctica"
+    ],
+    "answer": "South America",
+    "explanation": "The strait separates mainland South America from Tierra del Fuego and links the Atlantic and Pacific."
+  },
+  {
+    "id": "geo-victoria-falls-rivers",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "Victoria Falls lies on which river, forming part of the border between Zambia and Zimbabwe?",
+    "options": [
+      "The Nile",
+      "The Congo",
+      "The Zambezi",
+      "The Limpopo"
+    ],
+    "answer": "The Zambezi",
+    "explanation": "The falls, known locally as Mosi-oa-Tunya, are among the world's largest by width and height combined."
+  },
+  {
+    "id": "geo-gobi-countries",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "The Gobi Desert stretches across southern Mongolia and which neighboring country?",
+    "options": [
+      "Russia",
+      "China",
+      "Kazakhstan",
+      "India"
+    ],
+    "answer": "China",
+    "explanation": "The Gobi is a cold desert of rock and gravel covering parts of Mongolia and northern China."
+  },
+  {
+    "id": "geo-hudson-bay-territory",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": false,
+    "question": "Hudson Bay, a huge inland sea, is bordered almost entirely by which country?",
+    "options": [
+      "The United States",
+      "Canada",
+      "Greenland",
+      "Russia"
+    ],
+    "answer": "Canada",
+    "explanation": "The bay is surrounded by Canadian provinces and territories and drains a vast portion of North America."
+  },
+  {
+    "id": "geo-andes-highest",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": false,
+    "question": "Aconcagua, the highest peak in the Andes and outside Asia, is located in which country?",
+    "options": [
+      "Chile",
+      "Peru",
+      "Argentina",
+      "Bolivia"
+    ],
+    "answer": "Argentina",
+    "explanation": "Aconcagua rises about 6,961 meters in western Argentina, near the Chilean border."
+  },
+  {
+    "id": "geo-prime-meridian-city",
+    "difficulty": "medium",
+    "category": "Geography",
+    "family": true,
+    "question": "The historic Prime Meridian used by most maps passes through which London district?",
+    "options": [
+      "Westminster",
+      "Greenwich",
+      "Camden",
+      "Kensington"
+    ],
+    "answer": "Greenwich",
+    "explanation": "The Royal Observatory at Greenwich defined the meridian that later became the international reference."
+  },
+  {
+    "id": "geo-lake-tanganyika",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": false,
+    "question": "Lake Tanganyika, the world's second-deepest freshwater lake, is shared by Tanzania, the DRC, Burundi, and which other country?",
+    "options": [
+      "Kenya",
+      "Uganda",
+      "Zambia",
+      "Malawi"
+    ],
+    "answer": "Zambia",
+    "explanation": "It lies in the Albertine Rift; Malawi's large lake is Lake Malawi (Nyasa), a separate rift lake."
+  },
+  {
+    "id": "geo-taklamakan",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": false,
+    "question": "The Taklamakan Desert is a large sandy desert in which Chinese region?",
+    "options": [
+      "Tibet",
+      "Xinjiang",
+      "Inner Mongolia",
+      "Yunnan"
+    ],
+    "answer": "Xinjiang",
+    "explanation": "It occupies the Tarim Basin in northwest China, along old Silk Road routes that skirted the sands."
+  },
+  {
+    "id": "geo-orinoco",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": false,
+    "question": "The Orinoco River, one of South America's longest, flows mainly through which country before reaching the Atlantic?",
+    "options": [
+      "Brazil",
+      "Colombia",
+      "Venezuela",
+      "Guyana"
+    ],
+    "answer": "Venezuela",
+    "explanation": "It drains much of Venezuela and part of Colombia, emptying through a wide delta into the Atlantic."
+  },
+  {
+    "id": "geo-nullarbor",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": false,
+    "question": "The Nullarbor Plain, a vast treeless limestone plateau, is in which country?",
+    "options": [
+      "South Africa",
+      "Australia",
+      "Argentina",
+      "Spain"
+    ],
+    "answer": "Australia",
+    "explanation": "The name comes from Latin for 'no trees'; it lies along the Great Australian Bight in the south."
+  },
+  {
+    "id": "geo-darial-caucasus",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": false,
+    "question": "The Dariel (or Darial) Gorge, a historic pass in the Caucasus, lies on the border between Russia and which country?",
+    "options": [
+      "Azerbaijan",
+      "Armenia",
+      "Georgia",
+      "Turkey"
+    ],
+    "answer": "Georgia",
+    "explanation": "The pass through the Terek River gorge has long been a route between the North and South Caucasus."
+  },
+  {
+    "id": "geo-makran",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": false,
+    "question": "The Makran Coast, a rugged shoreline on the Arabian Sea, is shared by Iran and which other country?",
+    "options": [
+      "India",
+      "Pakistan",
+      "Oman",
+      "Iraq"
+    ],
+    "answer": "Pakistan",
+    "explanation": "The Makran stretches along southeastern Iran and southwestern Pakistan, west of the Indus delta."
+  },
+  {
+    "id": "geo-lake-titicaca-border",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": true,
+    "question": "Lake Titicaca, one of the world's highest large lakes, is shared by Peru and which other country?",
+    "options": [
+      "Chile",
+      "Bolivia",
+      "Ecuador",
+      "Argentina"
+    ],
+    "answer": "Bolivia",
+    "explanation": "It sits on the Altiplano; an island in the lake is sacred in Andean tradition as a place of origin."
+  },
+  {
+    "id": "geo-sundarbans",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": false,
+    "question": "The Sundarbans, the world's largest mangrove forest, lie in the delta of the Ganges and Brahmaputra in India and which other country?",
+    "options": [
+      "Myanmar",
+      "Bangladesh",
+      "Nepal",
+      "Sri Lanka"
+    ],
+    "answer": "Bangladesh",
+    "explanation": "The forest is famous for its Bengal tigers and is a UNESCO World Heritage site in both countries."
+  },
+  {
+    "id": "geo-mount-elbrus",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": true,
+    "question": "Mount Elbrus, the highest peak in the Caucasus and conventionally in Europe, is located in which country?",
+    "options": [
+      "Georgia",
+      "Turkey",
+      "Russia",
+      "Azerbaijan"
+    ],
+    "answer": "Russia",
+    "explanation": "Elbrus is a dormant volcano in the Russian Caucasus and a familiar 'Seven Summits' peak."
+  },
+  {
+    "id": "geo-okavango",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": true,
+    "question": "The Okavango Delta, an inland delta that does not reach the sea, is located in which country?",
+    "options": [
+      "Namibia",
+      "Botswana",
+      "Zambia",
+      "Angola"
+    ],
+    "answer": "Botswana",
+    "explanation": "The Okavango River fans out in the Kalahari; its headwaters are in Angola, and it is a major wildlife refuge."
+  },
+  {
+    "id": "sci-au-latin",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "The chemical symbol Au for gold comes from which Latin word?",
+    "options": [
+      "Argentum",
+      "Aurum",
+      "Ferrum",
+      "Plumbum"
+    ],
+    "answer": "Aurum",
+    "explanation": "Argentum is silver (Ag), ferrum is iron (Fe), and plumbum is lead (Pb)."
+  },
+  {
+    "id": "sci-nitrogen-air",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "Which gas makes up about 78 percent of Earth's atmosphere by volume?",
+    "options": [
+      "Oxygen",
+      "Carbon dioxide",
+      "Nitrogen",
+      "Argon"
+    ],
+    "answer": "Nitrogen",
+    "explanation": "Nitrogen is about 78 percent; oxygen is about 21 percent, with argon and other gases in small amounts."
+  },
+  {
+    "id": "sci-ganymede",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "Which moon, larger than the planet Mercury, is the largest in the solar system?",
+    "options": [
+      "Titan",
+      "Ganymede",
+      "Callisto",
+      "Io"
+    ],
+    "answer": "Ganymede",
+    "explanation": "Ganymede orbits Jupiter; Saturn's Titan is the second-largest moon."
+  },
+  {
+    "id": "sci-iron-26",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "Which element has the atomic number 26?",
+    "options": [
+      "Copper",
+      "Iron",
+      "Nickel",
+      "Cobalt"
+    ],
+    "answer": "Iron",
+    "explanation": "Iron's atomic number is 26; cobalt is 27, nickel 28, and copper 29."
+  },
+  {
+    "id": "sci-dna-full",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "In the abbreviation DNA, what does the letter D stand for?",
+    "options": [
+      "Dextro",
+      "Deoxy",
+      "Dual",
+      "Dynamic"
+    ],
+    "answer": "Deoxy",
+    "explanation": "DNA is deoxyribonucleic acid; the 'deoxy' marks a missing oxygen compared with RNA's ribose sugar."
+  },
+  {
+    "id": "sci-speed-light",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "The speed of light in a vacuum is approximately how many kilometers per second?",
+    "options": [
+      "3,000",
+      "30,000",
+      "300,000",
+      "3,000,000"
+    ],
+    "answer": "300,000",
+    "explanation": "The exact figure is 299,792 kilometers per second, usually rounded to 300,000 km/s."
+  },
+  {
+    "id": "sci-kepler-ellipse",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "Kepler's first law states that planets orbit the Sun in which kind of path, with the Sun at one focus?",
+    "options": [
+      "A perfect circle",
+      "An ellipse",
+      "A parabola",
+      "A hyperbola"
+    ],
+    "answer": "An ellipse",
+    "explanation": "A circle is a special ellipse; planetary orbits are slightly elliptical, as Kepler found from Tycho Brahe's data."
+  },
+  {
+    "id": "sci-photosynthesis-gas",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "During photosynthesis, plants release which gas as a byproduct when they split water?",
+    "options": [
+      "Carbon dioxide",
+      "Nitrogen",
+      "Oxygen",
+      "Methane"
+    ],
+    "answer": "Oxygen",
+    "explanation": "Light-dependent reactions split water, freeing oxygen; carbon dioxide is used later to make sugars."
+  },
+  {
+    "id": "sci-periodic-mendeleev",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "Which Russian chemist is credited with publishing the first widely recognized periodic table in 1869?",
+    "options": [
+      "Dmitri Mendeleev",
+      "Amedeo Avogadro",
+      "Svante Arrhenius",
+      "Jöns Jacob Berzelius"
+    ],
+    "answer": "Dmitri Mendeleev",
+    "explanation": "Mendeleev arranged elements by atomic weight and properties and left gaps for then-undiscovered elements."
+  },
+  {
+    "id": "sci-absolute-zero-c",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "Absolute zero, 0 kelvin, is approximately what temperature in degrees Celsius?",
+    "options": [
+      "-100",
+      "-273",
+      "-459",
+      "-32"
+    ],
+    "answer": "-273",
+    "explanation": "It is -273.15°C, the point at which a system's entropy reaches its minimum in classical thermodynamics."
+  },
+  {
+    "id": "sci-human-chromosomes",
+    "difficulty": "easy",
+    "category": "Science",
+    "family": true,
+    "question": "How many chromosomes are in a typical human somatic cell, counting the pairs as a total number?",
+    "options": [
+      "23",
+      "46",
+      "48",
+      "44"
+    ],
+    "answer": "46",
+    "explanation": "Humans have 23 pairs, or 46 chromosomes, in most body cells; sperm and egg cells have 23 each."
+  },
+  {
+    "id": "sci-titania-uranus",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": false,
+    "question": "Titania and Oberon are the two largest moons of which planet?",
+    "options": [
+      "Neptune",
+      "Uranus",
+      "Saturn",
+      "Pluto"
+    ],
+    "answer": "Uranus",
+    "explanation": "William Herschel discovered Titania and Oberon in 1787; they are named from Shakespearean characters."
+  },
+  {
+    "id": "sci-halogens-group",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "Fluorine, chlorine, bromine, and iodine belong to which group of the periodic table?",
+    "options": [
+      "The alkali metals",
+      "The noble gases",
+      "The halogens",
+      "The alkaline earth metals"
+    ],
+    "answer": "The halogens",
+    "explanation": "They are Group 17, highly reactive nonmetals that form salts; astatine and tennessine are also in the group."
+  },
+  {
+    "id": "sci-mitosis-vs",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "Mitosis produces two daughter cells that are genetically what, relative to the parent cell?",
+    "options": [
+      "Haploid and unique",
+      "Diploid and essentially identical",
+      "Haploid and identical",
+      "Polyploid and unique"
+    ],
+    "answer": "Diploid and essentially identical",
+    "explanation": "Mitosis is ordinary cell division; meiosis produces haploid gametes with shuffled genes."
+  },
+  {
+    "id": "sci-avogadro-number",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "Avogadro's number, about 6.02 × 10^23, is the number of particles in what amount of a substance?",
+    "options": [
+      "One milliliter",
+      "One mole",
+      "One kilogram",
+      "One liter at STP only"
+    ],
+    "answer": "One mole",
+    "explanation": "A mole is defined so that 12 grams of carbon-12 contain Avogadro's number of atoms."
+  },
+  {
+    "id": "sci-crick-watson-year",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "James Watson and Francis Crick published their double-helix model of DNA in which year, in Nature?",
+    "options": [
+      "1944",
+      "1953",
+      "1962",
+      "1968"
+    ],
+    "answer": "1953",
+    "explanation": "Their paper built on work including Rosalind Franklin's and Maurice Wilkins's X-ray data; the three men later shared a Nobel."
+  },
+  {
+    "id": "sci-plate-boundary-andes",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "The Andes are a classic example of mountains built mainly by which kind of plate boundary?",
+    "options": [
+      "A mid-ocean ridge",
+      "A continental collision like the Himalayas only",
+      "The subduction of an oceanic plate under a continent",
+      "A transform fault like the San Andreas"
+    ],
+    "answer": "The subduction of an oceanic plate under a continent",
+    "explanation": "The Nazca Plate dives beneath South America, fueling volcanoes and uplifting the Andes."
+  },
+  {
+    "id": "sci-isotope-def",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "Isotopes of an element have the same number of protons but different numbers of what?",
+    "options": [
+      "Electrons only",
+      "Neutrons",
+      "Nuclei",
+      "Valence shells"
+    ],
+    "answer": "Neutrons",
+    "explanation": "Different neutron counts change the mass number, as in carbon-12 and carbon-14."
+  },
+  {
+    "id": "sci-ozone-formula",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "Ozone, which forms a protective layer in the stratosphere, is a molecule made of how many oxygen atoms?",
+    "options": [
+      "Two",
+      "Three",
+      "Four",
+      "Eight"
+    ],
+    "answer": "Three",
+    "explanation": "Ozone is O3; ordinary oxygen gas is O2. The ozone layer absorbs much of the Sun's ultraviolet-B radiation."
+  },
+  {
+    "id": "sci-faraday-induction",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": false,
+    "question": "Michael Faraday's law of induction describes how a changing magnetic field produces what?",
+    "options": [
+      "A gravitational wave",
+      "An electric field, or an electromotive force",
+      "A nuclear reaction",
+      "A change in mass"
+    ],
+    "answer": "An electric field, or an electromotive force",
+    "explanation": "It is a foundation of electric generators and transformers, later built into Maxwell's equations."
+  },
+  {
+    "id": "sci-red-shift",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "In astronomy, a cosmological redshift of a galaxy's light is commonly interpreted as evidence of what?",
+    "options": [
+      "The galaxy is made of red stars only",
+      "The universe is expanding, stretching the light's wavelength",
+      "Dust is scattering all blue light nearby",
+      "The galaxy is cooling rapidly"
+    ],
+    "answer": "The universe is expanding, stretching the light's wavelength",
+    "explanation": "Edwin Hubble showed that more distant galaxies recede faster; the expansion stretches photon wavelengths."
+  },
+  {
+    "id": "sci-catalyst-def",
+    "difficulty": "medium",
+    "category": "Science",
+    "family": true,
+    "question": "A catalyst speeds up a chemical reaction mainly by doing which of the following?",
+    "options": [
+      "Being consumed as a reactant",
+      "Raising the temperature of the universe",
+      "Lowering the activation energy, without being used up",
+      "Changing the overall energy difference of products and reactants"
+    ],
+    "answer": "Lowering the activation energy, without being used up",
+    "explanation": "Catalysts provide an easier path for the reaction; enzymes are biological catalysts."
+  },
+  {
+    "id": "sci-tungsten-number",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": false,
+    "question": "What is the atomic number of tungsten, the metal whose symbol is W?",
+    "options": [
+      "74",
+      "42",
+      "56",
+      "92"
+    ],
+    "answer": "74",
+    "explanation": "W comes from wolfram; tungsten's atomic number is 74, and it is used in filaments and hard alloys."
+  },
+  {
+    "id": "sci-hubble-constant-unit",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": false,
+    "question": "The Hubble constant is typically expressed in which units?",
+    "options": [
+      "Meters per second",
+      "Kilometers per second per megaparsec",
+      "Light-years per year",
+      "Newtons per kilogram"
+    ],
+    "answer": "Kilometers per second per megaparsec",
+    "explanation": "It measures how recession speed increases with distance; its exact value is still refined by different methods."
+  },
+  {
+    "id": "sci-pauli-principle",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": false,
+    "question": "The Pauli exclusion principle states that no two electrons in an atom can share the same set of what?",
+    "options": [
+      "Orbits around the nucleus only",
+      "Four quantum numbers",
+      "Spin values only",
+      "Energy levels only"
+    ],
+    "answer": "Four quantum numbers",
+    "explanation": "The principle, applied to fermions, explains the structure of the periodic table and electron shells."
+  },
+  {
+    "id": "sci-becquerel-radio",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": true,
+    "question": "Which French physicist is credited with discovering radioactivity in uranium salts in 1896?",
+    "options": [
+      "Pierre Curie",
+      "Henri Becquerel",
+      "André-Marie Ampère",
+      "Louis de Broglie"
+    ],
+    "answer": "Henri Becquerel",
+    "explanation": "Becquerel shared the 1903 Nobel Prize in Physics with Marie and Pierre Curie."
+  },
+  {
+    "id": "sci-chirality",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": false,
+    "question": "A chiral molecule is one that cannot be superimposed on its what?",
+    "options": [
+      "Ionic salt",
+      "Mirror image",
+      "Polymer chain",
+      "Ground state"
+    ],
+    "answer": "Mirror image",
+    "explanation": "The two mirror forms are enantiomers; chirality is central to biochemistry and drug design."
+  },
+  {
+    "id": "sci-neutrino-flavors",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": false,
+    "question": "How many known flavors of neutrino are there in the Standard Model?",
+    "options": [
+      "Two",
+      "Three",
+      "Four",
+      "Six"
+    ],
+    "answer": "Three",
+    "explanation": "They are the electron, muon, and tau neutrinos, matching the three charged leptons."
+  },
+  {
+    "id": "sci-plate-transform",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": true,
+    "question": "The San Andreas Fault in California is a classic example of which type of plate boundary?",
+    "options": [
+      "A divergent boundary",
+      "A continental collision",
+      "A transform boundary",
+      "A subduction zone along its whole length"
+    ],
+    "answer": "A transform boundary",
+    "explanation": "The Pacific and North American plates slide past each other; parts of the West Coast have other boundary types nearby."
+  },
+  {
+    "id": "sci-cno-cycle",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": false,
+    "question": "The CNO cycle is a set of nuclear fusion reactions that convert hydrogen to helium in stars, named for carbon and which two other elements?",
+    "options": [
+      "Calcium and neon",
+      "Nitrogen and oxygen",
+      "Nickel and osmium",
+      "Cobalt and neon"
+    ],
+    "answer": "Nitrogen and oxygen",
+    "explanation": "It dominates in stars more massive than the Sun; the proton-proton chain dominates in the Sun itself."
+  },
+  {
+    "id": "sci-planck-constant-role",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": false,
+    "question": "Planck's constant relates the energy of a photon to which other property of the photon?",
+    "options": [
+      "Its charge",
+      "Its frequency",
+      "Its baryon number",
+      "Its gravitational mass only"
+    ],
+    "answer": "Its frequency",
+    "explanation": "E = hν, where h is Planck's constant and ν is frequency; it sets the scale of quantum effects."
+  },
+  {
+    "id": "sci-lysosome",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": false,
+    "question": "In a eukaryotic cell, which organelle is especially associated with breaking down waste and macromolecules using acid hydrolases?",
+    "options": [
+      "The mitochondrion",
+      "The lysosome",
+      "The ribosome",
+      "The chloroplast"
+    ],
+    "answer": "The lysosome",
+    "explanation": "Lysosomes are membrane-bound sacs of digestive enzymes; they are prominent in animal cells."
+  },
+  {
+    "id": "pop-morricone",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Who composed the distinctive score for the 1966 film The Good, the Bad and the Ugly?",
+    "options": [
+      "John Williams",
+      "Ennio Morricone",
+      "Henry Mancini",
+      "Elmer Bernstein"
+    ],
+    "answer": "Ennio Morricone",
+    "explanation": "Morricone's music for Sergio Leone's Dollars Trilogy, including that film, became a Western trademark."
+  },
+  {
+    "id": "pop-citizen-kane-year",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Orson Welles's film Citizen Kane was first released in which year?",
+    "options": [
+      "1939",
+      "1941",
+      "1946",
+      "1952"
+    ],
+    "answer": "1941",
+    "explanation": "Welles co-wrote, directed, and starred in the film, often ranked among the greatest in cinema history."
+  },
+  {
+    "id": "pop-godfather-novel",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "The 1972 film The Godfather was adapted from a novel by which author?",
+    "options": [
+      "Mario Puzo",
+      "Nicholas Pileggi",
+      "Elmore Leonard",
+      "James Ellroy"
+    ],
+    "answer": "Mario Puzo",
+    "explanation": "Puzo later co-wrote the screenplays with Francis Ford Coppola."
+  },
+  {
+    "id": "pop-mj-thriller-year",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Michael Jackson's album Thriller, long a record-holder for worldwide sales, was released in which year?",
+    "options": [
+      "1979",
+      "1982",
+      "1985",
+      "1987"
+    ],
+    "answer": "1982",
+    "explanation": "Produced with Quincy Jones, it yielded multiple No. 1 singles and a landmark music video for the title track."
+  },
+  {
+    "id": "pop-beatles-sgt-pepper-year",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "The Beatles' album Sgt. Pepper's Lonely Hearts Club Band was released in which year?",
+    "options": [
+      "1965",
+      "1967",
+      "1969",
+      "1970"
+    ],
+    "answer": "1967",
+    "explanation": "It came out in May 1967 and became a defining work of the psychedelic era."
+  },
+  {
+    "id": "pop-key-anthem",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Who wrote the lyrics that later became 'The Star-Spangled Banner' after watching the bombardment of Fort McHenry?",
+    "options": [
+      "Betsy Ross",
+      "Francis Scott Key",
+      "John Philip Sousa",
+      "Julia Ward Howe"
+    ],
+    "answer": "Francis Scott Key",
+    "explanation": "Key wrote the poem in 1814; it officially became the U.S. national anthem in 1931."
+  },
+  {
+    "id": "pop-shakespeare-rosencrantz",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Rosencrantz and Guildenstern are courtiers in which Shakespeare tragedy?",
+    "options": [
+      "Macbeth",
+      "Hamlet",
+      "Othello",
+      "King Lear"
+    ],
+    "answer": "Hamlet",
+    "explanation": "They are childhood friends of Hamlet; Tom Stoppard later made them the leads of a play of their own."
+  },
+  {
+    "id": "pop-star-wars-year",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "The first Star Wars film, later subtitled A New Hope, reached theaters in which year?",
+    "options": [
+      "1975",
+      "1977",
+      "1980",
+      "1983"
+    ],
+    "answer": "1977",
+    "explanation": "George Lucas's film was originally released simply as Star Wars; the episode subtitle was added in a later re-release."
+  },
+  {
+    "id": "pop-eagles-hotel",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Which band released the 1976 album Hotel California?",
+    "options": [
+      "Fleetwood Mac",
+      "The Eagles",
+      "The Doobie Brothers",
+      "Steely Dan"
+    ],
+    "answer": "The Eagles",
+    "explanation": "The title track won a Grammy, and the album is among the best-selling records in U.S. history."
+  },
+  {
+    "id": "pop-monroe-artists",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Andy Warhol's famous silkscreen portraits of Marilyn Monroe are based on a publicity still from which 1953 film?",
+    "options": [
+      "Some Like It Hot",
+      "Gentlemen Prefer Blondes",
+      "Niagara",
+      "The Seven Year Itch"
+    ],
+    "answer": "Niagara",
+    "explanation": "Warhol used a cropped still from Niagara after Monroe's death in 1962 for the Marilyn Diptych and related prints."
+  },
+  {
+    "id": "pop-simpsons-town",
+    "difficulty": "easy",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "The Simpsons is set in which fictional American town?",
+    "options": [
+      "Quahog",
+      "Springfield",
+      "South Park",
+      "Arlen"
+    ],
+    "answer": "Springfield",
+    "explanation": "Matt Groening chose a common U.S. town name; the show has joked about which state it might be in."
+  },
+  {
+    "id": "pop-dark-side-first-track",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "What is the title of the opening track on Pink Floyd's 1973 album The Dark Side of the Moon?",
+    "options": [
+      "Breathe",
+      "Speak to Me",
+      "Time",
+      "Money"
+    ],
+    "answer": "Speak to Me",
+    "explanation": "The short opening piece, credited to Nick Mason, leads into 'Breathe.'"
+  },
+  {
+    "id": "pop-sopranos-club",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "In The Sopranos, what is the name of the strip club Tony Soprano uses as a hangout?",
+    "options": [
+      "The Bada Bing",
+      "The Peach Pit",
+      "The Bronze",
+      "The Garrison"
+    ],
+    "answer": "The Bada Bing",
+    "explanation": "The club, owned by Silvio Dante in the series, became one of the show's signature sets."
+  },
+  {
+    "id": "pop-kubrick-strangelove",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Stanley Kubrick's 1964 satirical film about nuclear war is titled Dr. Strangelove or: How I Learned to Stop Worrying and Love what?",
+    "options": [
+      "The Cold War",
+      "The Bomb",
+      "The Button",
+      "The End"
+    ],
+    "answer": "The Bomb",
+    "explanation": "Peter Sellers played three roles, including the title character, in the black comedy."
+  },
+  {
+    "id": "pop-mozart-amadeus-emperor",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "In the film and play Amadeus, Mozart's imperial patron in Vienna is which emperor?",
+    "options": [
+      "Joseph II",
+      "Francis I",
+      "Leopold II",
+      "Charles VI"
+    ],
+    "answer": "Joseph II",
+    "explanation": "Joseph II, an Enlightened Habsburg, is portrayed as a well-meaning if musically limited ruler."
+  },
+  {
+    "id": "pop-hendrix-woodstock-anthem",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "At Woodstock in 1969, Jimi Hendrix gave a famous distorted instrumental performance of which song?",
+    "options": [
+      "Blowin' in the Wind",
+      "The Star-Spangled Banner",
+      "America the Beautiful",
+      "God Save the Queen"
+    ],
+    "answer": "The Star-Spangled Banner",
+    "explanation": "The Monday-morning set became one of the festival's most lasting images of the Vietnam era."
+  },
+  {
+    "id": "pop-coppola-apocalypse",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Francis Ford Coppola's 1979 Vietnam War film Apocalypse Now is loosely based on which Joseph Conrad novella?",
+    "options": [
+      "Lord Jim",
+      "Heart of Darkness",
+      "Nostromo",
+      "The Secret Agent"
+    ],
+    "answer": "Heart of Darkness",
+    "explanation": "The story is transplanted from the Congo to the Vietnam War, with Marlon Brando as a Kurtz-like colonel."
+  },
+  {
+    "id": "pop-gatsby-author",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Who wrote the 1925 novel The Great Gatsby?",
+    "options": [
+      "Ernest Hemingway",
+      "F. Scott Fitzgerald",
+      "John Steinbeck",
+      "Sinclair Lewis"
+    ],
+    "answer": "F. Scott Fitzgerald",
+    "explanation": "The novel is set on Long Island and in New York during the Jazz Age and is a staple of American literature courses."
+  },
+  {
+    "id": "pop-prufrock-poet",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "Who wrote the poem 'The Love Song of J. Alfred Prufrock,' published in 1915?",
+    "options": [
+      "W. B. Yeats",
+      "T. S. Eliot",
+      "Ezra Pound",
+      "Wallace Stevens"
+    ],
+    "answer": "T. S. Eliot",
+    "explanation": "It was Eliot's first widely noticed poem and a landmark of modernist verse."
+  },
+  {
+    "id": "pop-orwell-year",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "George Orwell's novel Nineteen Eighty-Four was first published in which year?",
+    "options": [
+      "1945",
+      "1948",
+      "1949",
+      "1953"
+    ],
+    "answer": "1949",
+    "explanation": "The dystopian novel appeared in June 1949, shortly before Orwell's death in 1950."
+  },
+  {
+    "id": "pop-tarantino-reservoir",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Quentin Tarantino's first feature film as director, released in 1992, was which crime movie?",
+    "options": [
+      "Pulp Fiction",
+      "Reservoir Dogs",
+      "Jackie Brown",
+      "True Romance"
+    ],
+    "answer": "Reservoir Dogs",
+    "explanation": "True Romance was a Tarantino script directed by Tony Scott; Reservoir Dogs was his directing debut."
+  },
+  {
+    "id": "pop-fleetwood-rumours-year",
+    "difficulty": "medium",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Fleetwood Mac's album Rumours was released in which year?",
+    "options": [
+      "1975",
+      "1977",
+      "1979",
+      "1981"
+    ],
+    "answer": "1977",
+    "explanation": "Recorded amid band breakups, it became one of the best-selling albums of all time."
+  },
+  {
+    "id": "pop-citizen-rosebud",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "In Citizen Kane, 'Rosebud' is revealed at the end to be the name of what object?",
+    "options": [
+      "A racehorse",
+      "A sled from Kane's childhood",
+      "A yacht",
+      "A newspaper press"
+    ],
+    "answer": "A sled from Kane's childhood",
+    "explanation": "The sled, seen in an early flashback and burned at the end, stands in for a lost childhood."
+  },
+  {
+    "id": "pop-dsotm-prism",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "The prism on the cover of The Dark Side of the Moon was designed by which British art collective?",
+    "options": [
+      "The Designers Republic",
+      "Hipgnosis",
+      "Factory Records",
+      "Storm Inc."
+    ],
+    "answer": "Hipgnosis",
+    "explanation": "Storm Thorgerson's Hipgnosis studio created many famous album covers for Pink Floyd and others."
+  },
+  {
+    "id": "pop-joyce-ulysses-day",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "James Joyce's novel Ulysses is set on a single day in 1904, now celebrated as Bloomsday, on which date?",
+    "options": [
+      "May 16",
+      "June 16",
+      "July 4",
+      "March 17"
+    ],
+    "answer": "June 16",
+    "explanation": "June 16, 1904, was the day of Joyce's first outing with Nora Barnacle; the novel follows Leopold Bloom through Dublin."
+  },
+  {
+    "id": "pop-kubrick-odyssey-year",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Stanley Kubrick's film 2001: A Space Odyssey was released in which year?",
+    "options": [
+      "1964",
+      "1968",
+      "1971",
+      "1973"
+    ],
+    "answer": "1968",
+    "explanation": "Made with Arthur C. Clarke, it appeared the year before the Apollo 11 moon landing."
+  },
+  {
+    "id": "pop-brando-streetcar-role",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "Marlon Brando's breakthrough stage and film role as Stanley Kowalski came in which Tennessee Williams work?",
+    "options": [
+      "The Glass Menagerie",
+      "A Streetcar Named Desire",
+      "Cat on a Hot Tin Roof",
+      "Sweet Bird of Youth"
+    ],
+    "answer": "A Streetcar Named Desire",
+    "explanation": "Brando played Stanley on Broadway in 1947 and in Elia Kazan's 1951 film."
+  },
+  {
+    "id": "pop-radiohead-ok-computer-year",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "Radiohead's album OK Computer was released in which year?",
+    "options": [
+      "1995",
+      "1997",
+      "1999",
+      "2000"
+    ],
+    "answer": "1997",
+    "explanation": "The record, including 'Paranoid Android' and 'Karma Police,' became a landmark of 1990s alternative rock."
+  },
+  {
+    "id": "pop-coppola-conversation",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "Between The Godfather and The Godfather Part II, Francis Ford Coppola directed which 1974 surveillance thriller starring Gene Hackman?",
+    "options": [
+      "The French Connection",
+      "The Conversation",
+      "Klute",
+      "Chinatown"
+    ],
+    "answer": "The Conversation",
+    "explanation": "The film follows a wiretap expert and won the Palme d'Or at Cannes; Chinatown was directed by Roman Polanski."
+  },
+  {
+    "id": "pop-morrison-bluest-eye",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "Toni Morrison's first novel, published in 1970, is which book?",
+    "options": [
+      "Beloved",
+      "Song of Solomon",
+      "The Bluest Eye",
+      "Sula"
+    ],
+    "answer": "The Bluest Eye",
+    "explanation": "It tells the story of Pecola Breedlove; Morrison later won the Nobel Prize in Literature in 1993."
+  },
+  {
+    "id": "pop-scorsese-mean-streets",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "Martin Scorsese's 1973 breakthrough film about small-time criminals in Little Italy is titled what?",
+    "options": [
+      "Taxi Driver",
+      "Mean Streets",
+      "Raging Bull",
+      "Goodfellas"
+    ],
+    "answer": "Mean Streets",
+    "explanation": "It starred Harvey Keitel and a young Robert De Niro and set the tone for Scorsese's later crime films."
+  },
+  {
+    "id": "pop-bowie-ziggy-year",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": true,
+    "question": "David Bowie released the album The Rise and Fall of Ziggy Stardust and the Spiders from Mars in which year?",
+    "options": [
+      "1969",
+      "1972",
+      "1975",
+      "1977"
+    ],
+    "answer": "1972",
+    "explanation": "The concept album introduced Bowie's glam-rock persona Ziggy Stardust."
+  },
+  {
+    "id": "fun-octopus-hearts",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "How many hearts does a typical octopus have?",
+    "options": [
+      "One",
+      "Two",
+      "Three",
+      "Eight"
+    ],
+    "answer": "Three",
+    "explanation": "Two hearts pump blood through the gills, and a third pumps it through the rest of the body."
+  },
+  {
+    "id": "fun-platypus",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Besides the echidnas, which mammal is known for laying eggs?",
+    "options": [
+      "Wombat",
+      "Platypus",
+      "Koala",
+      "Numbat"
+    ],
+    "answer": "Platypus",
+    "explanation": "The platypus and echidnas are monotremes, the only living egg-laying mammals."
+  },
+  {
+    "id": "fun-roman-l",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "In Roman numerals, the letter L stands for which number?",
+    "options": [
+      "10",
+      "50",
+      "100",
+      "500"
+    ],
+    "answer": "50",
+    "explanation": "L is 50, C is 100, D is 500, and M is 1,000."
+  },
+  {
+    "id": "fun-honey-never",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Which food, if kept dry and sealed, is famous for remaining edible for centuries and has been found in ancient tombs?",
+    "options": [
+      "Olive oil",
+      "Honey",
+      "Soy sauce",
+      "Maple syrup"
+    ],
+    "answer": "Honey",
+    "explanation": "Honey's low water content and acidity help keep it from spoiling; edible honey has been recovered from ancient sites."
+  },
+  {
+    "id": "fun-sharks-trees",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "On the tree of life, sharks are far older as a group than trees. About how many million years ago did the first sharks appear, according to common textbook figures?",
+    "options": [
+      "About 50 million years ago",
+      "About 150 million years ago",
+      "About 400 million years ago",
+      "About 10 million years ago"
+    ],
+    "answer": "About 400 million years ago",
+    "explanation": "Shark ancestors date to the Silurian or Early Devonian, hundreds of millions of years before true trees and long before dinosaurs."
+  },
+  {
+    "id": "fun-wombat-cubes",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Wombats are unusual among mammals for producing droppings that are roughly what shape?",
+    "options": [
+      "Spherical",
+      "Cubic",
+      "Spiral",
+      "Needle-like"
+    ],
+    "answer": "Cubic",
+    "explanation": "The cubes help mark territory so the droppings stay put; the intestines form the shape."
+  },
+  {
+    "id": "fun-bananas-berry",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Botanically speaking, a banana is classified as which type of fruit?",
+    "options": [
+      "A drupe",
+      "A berry",
+      "A pome",
+      "A legume"
+    ],
+    "answer": "A berry",
+    "explanation": "In botany, a berry is a fleshy fruit from a single ovary; bananas, tomatoes, and grapes all qualify."
+  },
+  {
+    "id": "fun-fingerprints-koalas",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Which marsupial is often cited for having fingerprints that can look strikingly similar to a human's under close inspection?",
+    "options": [
+      "Kangaroo",
+      "Koala",
+      "Tasmanian devil",
+      "Opossum"
+    ],
+    "answer": "Koala",
+    "explanation": "Koala fingerprints have been noted as a curiosity; they evolved independently of primate prints."
+  },
+  {
+    "id": "fun-blue-whales-heart",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "A blue whale's heart is often compared in size to which everyday object?",
+    "options": [
+      "A grapefruit",
+      "A basketball",
+      "A small car",
+      "A football"
+    ],
+    "answer": "A small car",
+    "explanation": "The heart can weigh hundreds of pounds and is commonly likened to the size of a compact car, though exact comparisons vary."
+  },
+  {
+    "id": "fun-only-even-prime",
+    "difficulty": "easy",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "What is the only even prime number?",
+    "options": [
+      "0",
+      "1",
+      "2",
+      "4"
+    ],
+    "answer": "2",
+    "explanation": "Every even number greater than 2 is divisible by 2, so it is not prime."
+  },
+  {
+    "id": "fun-shrimp-heart",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "A shrimp's heart is located in which unexpected part of its body?",
+    "options": [
+      "Its tail fan",
+      "Its head region (thorax)",
+      "Each walking leg",
+      "Its antennae"
+    ],
+    "answer": "Its head region (thorax)",
+    "explanation": "In many decapods the heart sits in the thorax, behind the head, not in a separate chest like a mammal's."
+  },
+  {
+    "id": "fun-hummingbird-backward",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Hummingbirds are the only birds that can do which of the following in sustained flight?",
+    "options": [
+      "Migrate at night only",
+      "Fly backward",
+      "Hover with no wing movement",
+      "Glide across oceans without flapping"
+    ],
+    "answer": "Fly backward",
+    "explanation": "Their unique wing stroke lets them hover and fly backward as they feed on nectar."
+  },
+  {
+    "id": "fun-axolotl",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "The axolotl, famous for regenerating limbs, is a type of salamander originally native to lakes near which city?",
+    "options": [
+      "Lima",
+      "Mexico City",
+      "Bogotá",
+      "Guatemala City"
+    ],
+    "answer": "Mexico City",
+    "explanation": "Wild axolotls are native to the remaining waters of the Xochimilco system in the Valley of Mexico."
+  },
+  {
+    "id": "fun-lyrebird",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "The superb lyrebird of Australia is especially famous for what ability?",
+    "options": [
+      "Navigating by the stars",
+      "Mimicking many sounds, including tools and cameras",
+      "Sleeping in flight like some swifts only",
+      "Producing venom"
+    ],
+    "answer": "Mimicking many sounds, including tools and cameras",
+    "explanation": "Males mimic other birds and human-made noises as part of an elaborate courtship display."
+  },
+  {
+    "id": "fun-mantis-shrimp-punch",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "The peacock mantis shrimp is famous for attacking prey with a club-like appendage that can do what?",
+    "options": [
+      "Generate a cavitation bubble as it strikes at very high speed",
+      "Shock prey with electricity like an eel",
+      "Spray boiling water",
+      "Spin like a drill for minutes"
+    ],
+    "answer": "Generate a cavitation bubble as it strikes at very high speed",
+    "explanation": "The strike is among the fastest in the animal kingdom and can crack aquarium glass in rare cases."
+  },
+  {
+    "id": "fun-tardigrade",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Tardigrades, or water bears, are famous for surviving extreme conditions by entering which dry, dormant state?",
+    "options": [
+      "Hibernation like a bear",
+      "Cryptobiosis, or a tun state",
+      "Metamorphosis into a moth-like form",
+      "A spore with a hard shell of chitin only"
+    ],
+    "answer": "Cryptobiosis, or a tun state",
+    "explanation": "In the tun state they can endure intense radiation, vacuum, and severe drying, then revive in water."
+  },
+  {
+    "id": "fun-narwhal-tusk",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "A narwhal's long tusk is actually a modified version of which tooth?",
+    "options": [
+      "A lower incisor",
+      "A left canine, usually",
+      "A molar",
+      "A wisdom tooth analogue"
+    ],
+    "answer": "A left canine, usually",
+    "explanation": "The spiral tusk usually grows from the left side of the upper jaw, mainly in males, and is packed with nerve endings."
+  },
+  {
+    "id": "fun-crows-tools",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "New Caledonian crows are especially well known among birds for doing what?",
+    "options": [
+      "Migrating using only smell",
+      "Making and using tools to extract food",
+      "Sleeping underwater",
+      "Imitating whale song"
+    ],
+    "answer": "Making and using tools to extract food",
+    "explanation": "They shape twigs and leaves into hooks, a rare example of animal tool manufacture."
+  },
+  {
+    "id": "fun-immortal-jellyfish",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": false,
+    "question": "Turritopsis dohrnii is often nicknamed the 'immortal jellyfish' because it can revert from its adult form to which earlier stage?",
+    "options": [
+      "An egg still in the parent",
+      "A polyp",
+      "A spore",
+      "A chrysalis"
+    ],
+    "answer": "A polyp",
+    "explanation": "When stressed, it can transdifferentiate back into a polyp, potentially repeating its life cycle."
+  },
+  {
+    "id": "fun-horse-sleep",
+    "difficulty": "medium",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Horses can doze while standing thanks in part to a system of tendons and ligaments called what?",
+    "options": [
+      "The flight reflex",
+      "The stay apparatus",
+      "The withers lock",
+      "The pastern pump"
+    ],
+    "answer": "The stay apparatus",
+    "explanation": "It lets them rest their muscles while remaining upright; they still need to lie down for REM sleep."
+  },
+  {
+    "id": "fun-bomb-beetle",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": false,
+    "question": "The bombardier beetle defends itself by ejecting a hot chemical spray produced by mixing hydrogen peroxide with which other compounds, including hydroquinones?",
+    "options": [
+      "Hydroquinones, in a reaction chamber",
+      "Formic acid only, stored ready-made",
+      "Cyanide gas from crushed leaves",
+      "Ink like a squid"
+    ],
+    "answer": "Hydroquinones, in a reaction chamber",
+    "explanation": "Enzymes trigger a rapid reaction that heats the mixture close to boiling and blasts it at attackers."
+  },
+  {
+    "id": "fun-lynx-lynx-name",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": false,
+    "question": "The word 'lynx' is related to a Greek root associated with which idea, also seen in 'leukos' for white or light?",
+    "options": [
+      "Darkness",
+      "Light or brightness, for its reflective eyes",
+      "Silence",
+      "The forest"
+    ],
+    "answer": "Light or brightness, for its reflective eyes",
+    "explanation": "The name is often linked to the animal's gleaming eyes; a lynx also appears in the constellation Lynx."
+  },
+  {
+    "id": "fun-pistol-shrimp",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": false,
+    "question": "A pistol shrimp stuns prey by snapping a claw so fast that it creates what in the water?",
+    "options": [
+      "A vacuum tunnel to the surface",
+      "A cavitation bubble that collapses with a bang and a flash of light",
+      "A whirlpool several meters wide",
+      "A jet of boiling steam from vents"
+    ],
+    "answer": "A cavitation bubble that collapses with a bang and a flash of light",
+    "explanation": "The collapse produces a shock wave and a brief sonoluminescent flash, one of the loudest sounds in the ocean."
+  },
+  {
+    "id": "fun-aye-aye-finger",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": false,
+    "question": "The aye-aye of Madagascar is known for a long, thin middle finger used mainly to do what?",
+    "options": [
+      "Paint markings on trees with sap",
+      "Tap wood and extract insect larvae",
+      "Comb its tail only",
+      "Sling fruit to one another"
+    ],
+    "answer": "Tap wood and extract insect larvae",
+    "explanation": "It uses percussive foraging: tapping, listening, then gnawing wood and hooking grubs with the finger."
+  },
+  {
+    "id": "fun-reindeer-eyes",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": false,
+    "question": "Arctic reindeer can change the color of a layer in their eyes, the tapetum lucidum, between summer gold and winter blue, which helps them do what?",
+    "options": [
+      "See infrared heat from predators",
+      "See better in the low light of polar winter",
+      "Filter ultraviolet entirely out",
+      "Sleep with their eyes open in snow"
+    ],
+    "answer": "See better in the low light of polar winter",
+    "explanation": "The winter blue tapetum scatters more light to the retina, improving vision in continuous twilight and dark."
+  },
+  {
+    "id": "fun-slime-mold-maze",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": false,
+    "question": "The slime mold Physarum polycephalum has been shown in lab experiments to do which surprising thing?",
+    "options": [
+      "Write simple music",
+      "Find efficient paths through mazes and model transport networks",
+      "Photosynthesize in complete darkness",
+      "Form a vertebrate-like skeleton"
+    ],
+    "answer": "Find efficient paths through mazes and model transport networks",
+    "explanation": "It is a single-celled organism, not a fungus, that can solve shortest-path problems by growing toward food."
+  },
+  {
+    "id": "fun-hobbit-flores",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "Homo floresiensis, a small extinct human relative nicknamed the 'hobbit,' was found on which Indonesian island?",
+    "options": [
+      "Java",
+      "Sumatra",
+      "Flores",
+      "Sulawesi"
+    ],
+    "answer": "Flores",
+    "explanation": "Bones at Liang Bua cave on Flores date to tens of thousands of years ago; scientists still debate some details of the species."
+  },
+  {
+    "id": "fun-vampire-finch",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "The vampire ground finch of the Galápagos is unusual among Darwin's finches for sometimes feeding on what?",
+    "options": [
+      "Nectar only from cacti",
+      "The blood of other birds, especially boobies",
+      "Marine iguana tails",
+      "Whale lice"
+    ],
+    "answer": "The blood of other birds, especially boobies",
+    "explanation": "It pecks at the skin of Nazca or blue-footed boobies and drinks blood, a habit that may have started from preening."
+  },
+  {
+    "id": "fun-mimic-octopus",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "The mimic octopus, found in waters of Southeast Asia, is famous for impersonating several dangerous animals, including the lionfish, a sea snake, and which flatfish-like creature?",
+    "options": [
+      "A flounder (sole)",
+      "A blue-ringed octopus only",
+      "A great white shark",
+      "A moray eel only"
+    ],
+    "answer": "A flounder (sole)",
+    "explanation": "It can also mimic a banded sea snake and a lionfish, apparently as a defense against predators."
+  },
+  {
+    "id": "fun-wood-frog-freeze",
+    "difficulty": "hard",
+    "category": "Fun Facts",
+    "family": true,
+    "question": "The wood frog of North America can survive winter by doing what to much of its body water?",
+    "options": [
+      "Turning it into a gel of pectin",
+      "Allowing it to freeze, while concentrating sugars in its cells",
+      "Pumping it all out into the soil",
+      "Converting it to fat"
+    ],
+    "answer": "Allowing it to freeze, while concentrating sugars in its cells",
+    "explanation": "Ice forms in the body cavity, but glucose and other cryoprotectants help keep cells from being destroyed."
+  },
+  {
+    "id": "ca-capital-ottawa",
+    "difficulty": "easy",
+    "category": "Canada",
+    "family": true,
+    "question": "Canada's capital, Ottawa, stands on the border of Ontario and which other province, across the Ottawa River?",
+    "options": [
+      "Manitoba",
+      "Quebec",
+      "New Brunswick",
+      "Nova Scotia"
+    ],
+    "answer": "Quebec",
+    "explanation": "Gatineau, Quebec, faces Ottawa; the river forms much of the interprovincial boundary there."
+  },
+  {
+    "id": "ca-official-languages",
+    "difficulty": "easy",
+    "category": "Canada",
+    "family": true,
+    "question": "Which two languages are official at the federal level in Canada?",
+    "options": [
+      "English and Spanish",
+      "English and French",
+      "French and Inuktitut",
+      "English and German"
+    ],
+    "answer": "English and French",
+    "explanation": "The Official Languages Act makes English and French the official languages of the federal government."
+  },
+  {
+    "id": "ca-victoria-bc",
+    "difficulty": "easy",
+    "category": "Canada",
+    "family": true,
+    "question": "What is the capital city of British Columbia?",
+    "options": [
+      "Vancouver",
+      "Victoria",
+      "Kelowna",
+      "Kamloops"
+    ],
+    "answer": "Victoria",
+    "explanation": "Victoria sits on the southern tip of Vancouver Island; Vancouver is the province's largest city."
+  },
+  {
+    "id": "ca-head-of-gov",
+    "difficulty": "easy",
+    "category": "Canada",
+    "family": true,
+    "question": "In Canada's system of government, who is the head of government?",
+    "options": [
+      "The governor general",
+      "The prime minister",
+      "The chief justice",
+      "The monarch alone, day to day"
+    ],
+    "answer": "The prime minister",
+    "explanation": "Canada is a constitutional monarchy: the monarch is head of state, and the prime minister leads the government."
+  },
+  {
+    "id": "ca-time-zones",
+    "difficulty": "easy",
+    "category": "Canada",
+    "family": true,
+    "question": "How many standard time zones does Canada span, including Newfoundland's half-hour zone?",
+    "options": [
+      "Four",
+      "Five",
+      "Six",
+      "Eight"
+    ],
+    "answer": "Six",
+    "explanation": "They run from Pacific Time in the west to Newfoundland Time in the east."
+  },
+  {
+    "id": "ca-niagara-shared",
+    "difficulty": "easy",
+    "category": "Canada",
+    "family": true,
+    "question": "Horseshoe Falls, the largest of the Niagara Falls by volume, lies mostly on which side of the border?",
+    "options": [
+      "The New York side",
+      "The Ontario side",
+      "Evenly split down the middle of the drop",
+      "Entirely in Pennsylvania"
+    ],
+    "answer": "The Ontario side",
+    "explanation": "Horseshoe Falls is mainly in Ontario; the American and Bridal Veil Falls are on the U.S. side."
+  },
+  {
+    "id": "ca-new-brunswick-bilingual",
+    "difficulty": "medium",
+    "category": "Canada",
+    "family": true,
+    "question": "Which is the only Canadian province that is officially bilingual at the provincial level?",
+    "options": [
+      "Quebec",
+      "Ontario",
+      "New Brunswick",
+      "Manitoba"
+    ],
+    "answer": "New Brunswick",
+    "explanation": "New Brunswick's official bilingualism is entrenched; Quebec's official language is French, with federal services still bilingual."
+  },
+  {
+    "id": "ca-pearson-nobel",
+    "difficulty": "medium",
+    "category": "Canada",
+    "family": true,
+    "question": "Which Canadian prime minister won the Nobel Peace Prize, largely for his role in resolving the 1956 Suez Crisis?",
+    "options": [
+      "John Diefenbaker",
+      "Lester B. Pearson",
+      "Pierre Trudeau",
+      "William Lyon Mackenzie King"
+    ],
+    "answer": "Lester B. Pearson",
+    "explanation": "Pearson, then a diplomat and later prime minister, helped create a United Nations emergency force; he received the prize in 1957."
+  },
+  {
+    "id": "ca-charlottetown",
+    "difficulty": "medium",
+    "category": "Canada",
+    "family": true,
+    "question": "The 1864 Charlottetown Conference, a key step toward Confederation, was held on which island?",
+    "options": [
+      "Cape Breton Island",
+      "Prince Edward Island",
+      "Newfoundland",
+      "Manitoulin Island"
+    ],
+    "answer": "Prince Edward Island",
+    "explanation": "Delegates first met in Charlottetown to discuss a maritime union, then a wider federation, leading toward 1867."
+  },
+  {
+    "id": "ca-loonie-bird",
+    "difficulty": "medium",
+    "category": "Canada",
+    "family": true,
+    "question": "Canada's one-dollar coin is nicknamed the loonie because it depicts which bird?",
+    "options": [
+      "A Canada goose",
+      "A common loon",
+      "A snowy owl",
+      "A bald eagle"
+    ],
+    "answer": "A common loon",
+    "explanation": "The gold-colored dollar was first issued in 1987; the two-dollar coin later became the toonie."
+  },
+  {
+    "id": "ca-nunavut-year",
+    "difficulty": "medium",
+    "category": "Canada",
+    "family": true,
+    "question": "In which year was the territory of Nunavut created, separating from the Northwest Territories?",
+    "options": [
+      "1982",
+      "1993",
+      "1999",
+      "2005"
+    ],
+    "answer": "1999",
+    "explanation": "Nunavut was established on April 1, 1999, as a result of a land-claim agreement with the Inuit."
+  },
+  {
+    "id": "ca-rcmp-original",
+    "difficulty": "medium",
+    "category": "Canada",
+    "family": false,
+    "question": "The Royal Canadian Mounted Police traces its roots to a force founded in 1873 under what original name?",
+    "options": [
+      "The North-West Mounted Police",
+      "The Dominion Constabulary",
+      "The Queen's Frontier Guard",
+      "The Yukon Field Force"
+    ],
+    "answer": "The North-West Mounted Police",
+    "explanation": "The NWMP was created to police the North-West Territories; it later merged into the RCMP in 1920."
+  },
+  {
+    "id": "ca-statute-westminster",
+    "difficulty": "hard",
+    "category": "Canada",
+    "family": false,
+    "question": "The Statute of Westminster, which granted Canada and other dominions legislative equality with Britain, was passed in which year?",
+    "options": [
+      "1867",
+      "1926",
+      "1931",
+      "1982"
+    ],
+    "answer": "1931",
+    "explanation": "The 1931 statute followed the Balfour Declaration of 1926; Canada's constitution was fully patriated in 1982."
+  },
+  {
+    "id": "ca-vimy",
+    "difficulty": "hard",
+    "category": "Canada",
+    "family": true,
+    "question": "The 1917 Battle of Vimy Ridge, a defining Canadian Corps victory in World War I, took place in which country?",
+    "options": [
+      "Belgium",
+      "France",
+      "Italy",
+      "the Netherlands"
+    ],
+    "answer": "France",
+    "explanation": "All four Canadian divisions attacked together at Vimy in April 1917, in the Arras sector of northern France."
+  },
+  {
+    "id": "ca-maple-leaf-year",
+    "difficulty": "hard",
+    "category": "Canada",
+    "family": true,
+    "question": "Canada's current Maple Leaf flag was officially adopted in which year?",
+    "options": [
+      "1867",
+      "1921",
+      "1965",
+      "1982"
+    ],
+    "answer": "1965",
+    "explanation": "After a sharp parliamentary debate, the new flag was first raised on February 15, 1965, replacing the Red Ensign."
+  },
+  {
+    "id": "ca-charlottetown-accord",
+    "difficulty": "hard",
+    "category": "Canada",
+    "family": false,
+    "question": "The 1992 Charlottetown Accord, a failed package of constitutional amendments, was rejected by voters in a national what?",
+    "options": [
+      "A general election only",
+      "A referendum",
+      "A Senate vote only",
+      "A court ruling"
+    ],
+    "answer": "A referendum",
+    "explanation": "It followed the failure of the Meech Lake Accord; both attempts to adjust the constitution after 1982 were unsuccessful."
+  },
+  {
+    "id": "ca-klondike-territory",
+    "difficulty": "hard",
+    "category": "Canada",
+    "family": true,
+    "question": "The Klondike Gold Rush of the late 1890s was centered in which present-day Canadian territory?",
+    "options": [
+      "Northwest Territories",
+      "Nunavut",
+      "Yukon",
+      "Labrador"
+    ],
+    "answer": "Yukon",
+    "explanation": "Prospectors flooded Dawson City after gold was found in 1896 in the Klondike tributaries of the Yukon River."
+  },
+  {
+    "id": "ca-bluenose",
+    "difficulty": "hard",
+    "category": "Canada",
+    "family": false,
+    "question": "Bluenose, the famous fishing and racing schooner that appears on the Canadian dime, was launched from which province?",
+    "options": [
+      "Newfoundland",
+      "Nova Scotia",
+      "New Brunswick",
+      "Prince Edward Island"
+    ],
+    "answer": "Nova Scotia",
+    "explanation": "Built at Lunenburg in 1921, Bluenose won international schooner races and became a maritime symbol of the province."
+  },
+  {
+    "id": "pnw-evergreen",
+    "difficulty": "easy",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "Which U.S. state has the official nickname the Evergreen State?",
+    "options": [
+      "Oregon",
+      "Washington",
+      "Idaho",
+      "Alaska"
+    ],
+    "answer": "Washington",
+    "explanation": "The name refers to the state's extensive conifer forests of fir, hemlock, and cedar."
+  },
+  {
+    "id": "pnw-rainier-highest",
+    "difficulty": "easy",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "Which mountain is the highest peak in Washington State?",
+    "options": [
+      "Mount Baker",
+      "Mount Adams",
+      "Mount Rainier",
+      "Mount St. Helens"
+    ],
+    "answer": "Mount Rainier",
+    "explanation": "Rainier rises just over 14,400 feet and is the most heavily glaciated peak in the contiguous United States."
+  },
+  {
+    "id": "pnw-space-needle-fair",
+    "difficulty": "easy",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "Seattle's Space Needle was built as the centerpiece of which event?",
+    "options": [
+      "The 1909 Alaska-Yukon-Pacific Exposition",
+      "The 1962 Seattle World's Fair",
+      "The 1986 Vancouver Expo",
+      "The 1974 Spokane Expo"
+    ],
+    "answer": "The 1962 Seattle World's Fair",
+    "explanation": "The tower was designed for the Century 21 Exposition and remains the city's most famous landmark."
+  },
+  {
+    "id": "pnw-columbia-oregon",
+    "difficulty": "easy",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "The Columbia River forms much of the border between Washington and which other U.S. state?",
+    "options": [
+      "Idaho",
+      "Oregon",
+      "California",
+      "Montana"
+    ],
+    "answer": "Oregon",
+    "explanation": "The river then turns west and reaches the Pacific near Astoria, Oregon, and Cape Disappointment, Washington."
+  },
+  {
+    "id": "pnw-olympic-rainforest",
+    "difficulty": "easy",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "The Hoh Rain Forest is found in which national park?",
+    "options": [
+      "Mount Rainier National Park",
+      "North Cascades National Park",
+      "Olympic National Park",
+      "Crater Lake National Park"
+    ],
+    "answer": "Olympic National Park",
+    "explanation": "The Hoh, on the Olympic Peninsula, is one of the best-known temperate rain forests in North America."
+  },
+  {
+    "id": "pnw-st-helens-year",
+    "difficulty": "easy",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "In which year did Mount St. Helens erupt in a catastrophic lateral blast that removed much of its summit?",
+    "options": [
+      "1970",
+      "1980",
+      "1991",
+      "2004"
+    ],
+    "answer": "1980",
+    "explanation": "The May 18, 1980, eruption flattened forests, sent ash across states, and left a horseshoe-shaped crater."
+  },
+  {
+    "id": "pnw-juan-de-fuca",
+    "difficulty": "medium",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "The Strait of Juan de Fuca separates Washington's Olympic Peninsula from which large island?",
+    "options": [
+      "Whidbey Island",
+      "Vancouver Island",
+      "San Juan Island",
+      "Haida Gwaii"
+    ],
+    "answer": "Vancouver Island",
+    "explanation": "The strait is the main outlet of the Salish Sea to the Pacific, between the United States and Canada."
+  },
+  {
+    "id": "pnw-lewis-clark-mouth",
+    "difficulty": "medium",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "The Lewis and Clark Expedition reached the Pacific near the mouth of which river in 1805?",
+    "options": [
+      "The Fraser River",
+      "The Columbia River",
+      "The Snake River only, and then turned back",
+      "The Skagit River"
+    ],
+    "answer": "The Columbia River",
+    "explanation": "They wintered at Fort Clatsop, near present-day Astoria, after reaching the Columbia's estuary."
+  },
+  {
+    "id": "pnw-oregon-treaty-line",
+    "difficulty": "medium",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "The Oregon Treaty of 1846 set most of the western U.S.–British North America border along which line of latitude?",
+    "options": [
+      "The 42nd parallel",
+      "The 49th parallel",
+      "The 54th parallel",
+      "The 45th parallel"
+    ],
+    "answer": "The 49th parallel",
+    "explanation": "The treaty settled the Oregon boundary dispute; Vancouver Island remained British south of the 49th in part."
+  },
+  {
+    "id": "pnw-crater-lake-volcano",
+    "difficulty": "medium",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "Crater Lake in Oregon occupies the caldera of which collapsed volcano?",
+    "options": [
+      "Mount Hood",
+      "Mount Mazama",
+      "Mount Shasta",
+      "Mount Bachelor"
+    ],
+    "answer": "Mount Mazama",
+    "explanation": "Mazama erupted and collapsed about 7,700 years ago; the lake is one of the deepest in the United States."
+  },
+  {
+    "id": "pnw-idaho-panhandle-west",
+    "difficulty": "medium",
+    "category": "Pacific Northwest",
+    "family": false,
+    "question": "Idaho's panhandle is the narrow northern strip of the state between Montana and which neighbor to the west?",
+    "options": [
+      "Oregon",
+      "Washington",
+      "Nevada",
+      "Wyoming"
+    ],
+    "answer": "Washington",
+    "explanation": "The panhandle also borders British Columbia on the north; Spokane sits just west of this region."
+  },
+  {
+    "id": "pnw-hanford",
+    "difficulty": "medium",
+    "category": "Pacific Northwest",
+    "family": false,
+    "question": "The Hanford Site in Washington, a major Manhattan Project location, was built to produce which material?",
+    "options": [
+      "Enriched uranium only",
+      "Plutonium",
+      "Heavy water for Canada",
+      "Tritium for lanterns"
+    ],
+    "answer": "Plutonium",
+    "explanation": "Reactors along the Columbia produced plutonium, including material used in the Trinity test and the Nagasaki bomb."
+  },
+  {
+    "id": "pnw-pig-war",
+    "difficulty": "hard",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "The so-called Pig War of 1859 was a bloodless standoff over which island group's sovereignty, left unsettled by the Oregon Treaty?",
+    "options": [
+      "The Gulf Islands only",
+      "The San Juan Islands",
+      "The Queen Charlotte Islands",
+      "The Channel Islands"
+    ],
+    "answer": "The San Juan Islands",
+    "explanation": "A disputed border through the straits led to a joint military occupation until arbitration in 1872 awarded the islands to the United States."
+  },
+  {
+    "id": "pnw-cascadia",
+    "difficulty": "hard",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "The Cascadia subduction zone is a fault system in which an oceanic plate dives beneath North America. Which plate is being subducted there?",
+    "options": [
+      "The Pacific Plate only, along this whole zone",
+      "The Juan de Fuca Plate",
+      "The Nazca Plate",
+      "The Cocos Plate"
+    ],
+    "answer": "The Juan de Fuca Plate",
+    "explanation": "The Juan de Fuca, Explorer, and Gorda plates are remnants of the Farallon Plate; Cascadia can produce very large earthquakes."
+  },
+  {
+    "id": "pnw-neah-bay",
+    "difficulty": "hard",
+    "category": "Pacific Northwest",
+    "family": false,
+    "question": "Neah Bay, near the northwesternmost point of the contiguous United States, is the main community of which Native nation?",
+    "options": [
+      "The Yakama Nation",
+      "The Makah Tribe",
+      "The Nez Perce Tribe",
+      "The Spokane Tribe"
+    ],
+    "answer": "The Makah Tribe",
+    "explanation": "The Makah Reservation is on the northwestern Olympic Peninsula, by the Strait of Juan de Fuca and the Pacific."
+  },
+  {
+    "id": "pnw-willamette",
+    "difficulty": "hard",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "Oregon's Willamette River flows north through the state's main population corridor and joins which larger river at Portland?",
+    "options": [
+      "The Snake River",
+      "The Columbia River",
+      "The Rogue River",
+      "The Deschutes River"
+    ],
+    "answer": "The Columbia River",
+    "explanation": "The Willamette Valley is Oregon's agricultural and urban heart; the confluence is at Portland."
+  },
+  {
+    "id": "pnw-kluane",
+    "difficulty": "hard",
+    "category": "Pacific Northwest",
+    "family": false,
+    "question": "Kluane National Park in the Yukon, home to some of Canada's highest peaks, is dominated by which mountain range?",
+    "options": [
+      "The Columbia Mountains",
+      "The St. Elias Mountains",
+      "The Brooks Range",
+      "The Mackenzie Mountains"
+    ],
+    "answer": "The St. Elias Mountains",
+    "explanation": "The range includes Mount Logan, Canada's highest peak, in a huge ice-field wilderness shared with Alaska."
+  },
+  {
+    "id": "pnw-fort-vancouver",
+    "difficulty": "hard",
+    "category": "Pacific Northwest",
+    "family": true,
+    "question": "Fort Vancouver, a major 19th-century Hudson's Bay Company post on the Columbia, was established under which chief factor often called the 'father of Oregon'?",
+    "options": [
+      "John McLoughlin",
+      "George Vancouver",
+      "Peter Skene Ogden",
+      "Isaac Stevens"
+    ],
+    "answer": "John McLoughlin",
+    "explanation": "McLoughlin ran the Columbia District from Fort Vancouver, in present-day Vancouver, Washington, and later settled in Oregon City."
+  },
+  {
+    "id": "us-albany-plan",
+    "difficulty": "hard",
+    "category": "US History",
+    "family": true,
+    "question": "The 1754 Albany Plan of Union, an early proposal for colonial cooperation, was chiefly drafted by which founder?",
+    "options": [
+      "Thomas Jefferson",
+      "Benjamin Franklin",
+      "John Adams",
+      "James Otis"
+    ],
+    "answer": "Benjamin Franklin",
+    "explanation": "The Albany Congress considered Franklin's plan during the French and Indian War; the colonies and the Crown did not adopt it."
+  },
+  {
+    "id": "eu-treaty-tordesillas-wait",
+    "difficulty": "hard",
+    "category": "European History",
+    "family": false,
+    "question": "The 1555 Peace of Augsburg allowed princes of the Holy Roman Empire to choose Lutheranism or Catholicism under which Latin formula?",
+    "options": [
+      "Cuius regio, eius religio",
+      "Veni, vidi, vici",
+      "Sic semper tyrannis",
+      "E pluribus unum"
+    ],
+    "answer": "Cuius regio, eius religio",
+    "explanation": "The phrase means 'whose realm, his religion'; Calvinism was not included until the Peace of Westphalia."
+  },
+  {
+    "id": "wh-meiji-charter",
+    "difficulty": "hard",
+    "category": "World History",
+    "family": false,
+    "question": "The 1868 Charter Oath, a five-article pledge that set out Meiji reform principles, was issued in the name of which Japanese emperor?",
+    "options": [
+      "Emperor Taishō",
+      "Emperor Meiji (Mutsuhito)",
+      "Emperor Shōwa (Hirohito)",
+      "Emperor Kōmei"
+    ],
+    "answer": "Emperor Meiji (Mutsuhito)",
+    "explanation": "The oath promised deliberative assemblies, an end to 'evil customs,' and knowledge to be sought throughout the world."
+  },
+  {
+    "id": "geo-lake-nyasa-name",
+    "difficulty": "hard",
+    "category": "Geography",
+    "family": false,
+    "question": "Lake Malawi, one of Africa's Great Lakes, is also widely known by which other name?",
+    "options": [
+      "Lake Albert",
+      "Lake Nyasa",
+      "Lake Mweru",
+      "Lake Turkana"
+    ],
+    "answer": "Lake Nyasa",
+    "explanation": "Nyasa is an older name still used, especially in Mozambique and Tanzania, which share the lake with Malawi."
+  },
+  {
+    "id": "sci-einstein-photoelectric",
+    "difficulty": "hard",
+    "category": "Science",
+    "family": true,
+    "question": "Albert Einstein won the 1921 Nobel Prize in Physics chiefly for his work on which effect, not for general relativity?",
+    "options": [
+      "The Compton effect",
+      "The photoelectric effect",
+      "Brownian motion only",
+      "Blackbody radiation only"
+    ],
+    "answer": "The photoelectric effect",
+    "explanation": "His 1905 paper treated light as quanta; the Nobel citation highlighted the photoelectric law, awarded in 1922 for 1921."
+  },
+  {
+    "id": "pop-vertigo-year",
+    "difficulty": "hard",
+    "category": "Pop Culture",
+    "family": false,
+    "question": "Alfred Hitchcock's film Vertigo, starring James Stewart and Kim Novak, was released in which year?",
+    "options": [
+      "1954",
+      "1958",
+      "1960",
+      "1963"
+    ],
+    "answer": "1958",
+    "explanation": "The film, set in San Francisco, was a box-office disappointment at first and later became a critics' favorite."
+  }
+];
 
-    { difficulty: "medium", category: "US History", question: "From which country did the United States buy the Louisiana Purchase?", options: ["Spain", "Britain", "France", "Mexico"], answer: "France", explanation: "In 1803, the United States purchased the Louisiana Territory from Napoleon's France for $15 million." },
-    { difficulty: "medium", category: "European History", question: "In which year did World War II end in Europe?", options: ["1943", "1944", "1945", "1946"], answer: "1945", explanation: "Nazi Germany surrendered in May 1945, ending the war in Europe; the Pacific war ended later that year." },
-    { difficulty: "medium", category: "Geography", question: "What is the capital of Australia?", options: ["Sydney", "Melbourne", "Canberra", "Perth"], answer: "Canberra", explanation: "Canberra was purpose-built as the capital, a compromise between rivals Sydney and Melbourne." },
-    { difficulty: "medium", category: "Science", question: "At standard atmospheric pressure, at what Celsius temperature does water boil?", options: ["90°C", "100°C", "110°C", "212°C"], answer: "100°C", explanation: "At 1 atmosphere of pressure, water boils at 100 degrees Celsius, which is 212 degrees Fahrenheit." },
-    { difficulty: "medium", category: "Pop Culture", question: "In which English city did the Beatles form?", options: ["London", "Manchester", "Liverpool", "Birmingham"], answer: "Liverpool", explanation: "John, Paul, George, and later Ringo all came out of Liverpool's 1960s music scene." },
-    { difficulty: "medium", category: "General Knowledge", question: "How many amendments make up the U.S. Bill of Rights?", options: ["5", "8", "10", "12"], answer: "10", explanation: "The first ten amendments to the U.S. Constitution, ratified in 1791, are known as the Bill of Rights." },
-    { difficulty: "medium", category: "Pacific Northwest", question: "The Space Needle was built for which event?", options: ["The 1962 Seattle World's Fair", "The 1909 Alaska-Yukon-Pacific Exposition", "The 1986 Expo in Vancouver", "The 1939 New York World's Fair"], answer: "The 1962 Seattle World's Fair", explanation: "The Space Needle was the centerpiece of Seattle's Century 21 Exposition in 1962." },
-    { difficulty: "medium", category: "Canada", question: "Which two languages are official at the federal level in Canada?", options: ["English and Spanish", "English and French", "French and German", "English and Inuktitut"], answer: "English and French", explanation: "The Official Languages Act makes English and French the official languages of the Canadian federal government." },
-    { difficulty: "medium", category: "Fun Facts", question: "A group of lions is commonly called a what?", options: ["Herd", "Pack", "Pride", "Flock"], answer: "Pride", explanation: "Lions are the only big cats that regularly live in social groups, called prides." },
-    { difficulty: "medium", category: "US History", question: "How many stars are on the current official flag of the United States?", options: ["48", "49", "50", "52"], answer: "50", explanation: "The 50th star was added in 1960 after Hawaii became a state in 1959." },
-    { difficulty: "medium", category: "European History", question: "The Magna Carta was sealed in which year?", options: ["1066", "1215", "1492", "1688"], answer: "1215", explanation: "King John of England sealed the Magna Carta at Runnymede in 1215, limiting the power of the crown." },
-    { difficulty: "medium", category: "Science", question: "What does DNA stand for?", options: ["Dynamic Nuclear Acid", "Deoxyribonucleic acid", "Dioxin Nucleic Agent", "Dual Nucleotide Array"], answer: "Deoxyribonucleic acid", explanation: "DNA is the molecule that carries genetic instructions in living organisms." },
-    { difficulty: "medium", category: "Pacific Northwest", question: "Which mountain, visible from much of the Seattle area, is the highest in Washington State?", options: ["Mount Baker", "Mount Adams", "Mount Rainier", "Mount St. Helens"], answer: "Mount Rainier", explanation: "Mount Rainier rises just over 14,400 feet and is the most heavily glaciated peak in the contiguous United States." },
-    { difficulty: "medium", category: "General Knowledge", question: "Who painted the ceiling of the Sistine Chapel?", options: ["Leonardo da Vinci", "Raphael", "Michelangelo", "Donatello"], answer: "Michelangelo", explanation: "Michelangelo painted the Sistine Chapel ceiling between 1508 and 1512 for Pope Julius II." },
-    { difficulty: "medium", category: "Pop Culture", question: "Which singer is often called the Queen of Pop and released the album Like a Virgin?", options: ["Whitney Houston", "Madonna", "Cher", "Cyndi Lauper"], answer: "Madonna", explanation: "Madonna released Like a Virgin in 1984 and is widely known by the nickname Queen of Pop." },
-    { difficulty: "medium", category: "Fun Facts", question: "How many hearts does an octopus have?", options: ["1", "2", "3", "8"], answer: "3", explanation: "An octopus has two hearts that pump blood to the gills and a third that pumps it through the body." },
-    { difficulty: "medium", category: "General Knowledge", question: "What number is represented by the Roman numeral L?", options: ["10", "50", "100", "500"], answer: "50", explanation: "In Roman numerals, L is 50, C is 100, D is 500, and M is 1,000." },
-
-    { difficulty: "hard", category: "US History", question: "The 19th Amendment to the U.S. Constitution did which of the following?", options: ["Abolished slavery", "Limited presidents to two terms", "Granted women the right to vote", "Lowered the voting age to 18"], answer: "Granted women the right to vote", explanation: "The 19th Amendment was ratified in 1920; the 13th abolished slavery, the 22nd set term limits, and the 26th lowered the voting age." },
-    { difficulty: "hard", category: "European History", question: "In which year was the Battle of Hastings fought?", options: ["1066", "1215", "1415", "1588"], answer: "1066", explanation: "William of Normandy defeated King Harold II at Hastings in 1066 and became William the Conqueror." },
-    { difficulty: "hard", category: "Canada", question: "What is the capital of British Columbia?", options: ["Vancouver", "Victoria", "Kelowna", "Whistler"], answer: "Victoria", explanation: "Victoria, on the southern tip of Vancouver Island, is the provincial capital; Vancouver is the largest city." },
-    { difficulty: "hard", category: "Science", question: "Which moon is the largest in the solar system?", options: ["Titan", "Europa", "Earth's Moon", "Ganymede"], answer: "Ganymede", explanation: "Jupiter's moon Ganymede is larger than the planet Mercury and is the solar system's largest moon." },
-    { difficulty: "hard", category: "Pacific Northwest", question: "The Strait of Juan de Fuca separates the Olympic Peninsula from which island?", options: ["Vancouver Island", "San Juan Island", "Whidbey Island", "Haida Gwaii"], answer: "Vancouver Island", explanation: "The Strait of Juan de Fuca is the outlet of the Salish Sea, running between Washington's Olympic Peninsula and Vancouver Island." },
-    { difficulty: "hard", category: "US History", question: "In what year did Washington become a U.S. state?", options: ["1853", "1876", "1889", "1912"], answer: "1889", explanation: "Washington was admitted as the 42nd state on November 11, 1889; it had been a territory since 1853." },
-    { difficulty: "hard", category: "European History", question: "The Hundred Years' War was fought primarily between which two kingdoms?", options: ["Spain and Portugal", "England and France", "Austria and Prussia", "Rome and Carthage"], answer: "England and France", explanation: "The conflict lasted from 1337 to 1453 and was a long struggle over claims to the French throne." },
-    { difficulty: "hard", category: "Geography", question: "Which mountain range forms much of the border between France and Spain?", options: ["The Alps", "The Apennines", "The Pyrenees", "The Carpathians"], answer: "The Pyrenees", explanation: "The Pyrenees run from the Atlantic to the Mediterranean, separating the Iberian Peninsula from the rest of Europe." },
-    { difficulty: "hard", category: "Science", question: "Which element has the atomic number 26?", options: ["Copper", "Iron", "Nickel", "Zinc"], answer: "Iron", explanation: "Iron's atomic number is 26; copper is 29, nickel is 28, and zinc is 30." },
-    { difficulty: "hard", category: "Canada", question: "Which Canadian province is officially bilingual at the provincial level?", options: ["Quebec", "Ontario", "New Brunswick", "Manitoba"], answer: "New Brunswick", explanation: "New Brunswick is the only province that is officially bilingual; Quebec's official language is French." },
-    { difficulty: "hard", category: "General Knowledge", question: "How many time zones does Canada span?", options: ["4", "5", "6", "8"], answer: "6", explanation: "Canada uses six time zones, from Pacific in the west to Newfoundland Time in the east." },
-    { difficulty: "hard", category: "Pop Culture", question: "Who wrote the lyrics to The Star-Spangled Banner?", options: ["Betsy Ross", "Francis Scott Key", "John Philip Sousa", "Irving Berlin"], answer: "Francis Scott Key", explanation: "Key wrote the poem in 1814 after watching the bombardment of Fort McHenry; it later became the U.S. national anthem." },
-    { difficulty: "hard", category: "Fun Facts", question: "Which mammal is known for laying eggs, along with the echidna?", options: ["Wombat", "Platypus", "Koala", "Kangaroo"], answer: "Platypus", explanation: "The platypus and echidnas are the only living monotremes, or egg-laying mammals." },
-    { difficulty: "hard", category: "US History", question: "The Oregon Treaty of 1846 set the western U.S.–British North America border mainly along which line?", options: ["The 42nd parallel", "The 49th parallel", "The Columbia River", "The 54th parallel"], answer: "The 49th parallel", explanation: "The treaty settled the Oregon boundary dispute by extending the 49th parallel west, with Vancouver Island remaining British." },
-    { difficulty: "hard", category: "General Knowledge", question: "In Canada's system of government, who is the head of government?", options: ["The President", "The Governor General", "The Prime Minister", "The Chief Justice"], answer: "The Prime Minister", explanation: "Canada is a constitutional monarchy: the monarch is head of state, and the prime minister is head of government." },
-    { difficulty: "hard", category: "European History", question: "Marie Curie was the first person to win Nobel Prizes in two scientific fields. Those fields were:", options: ["Physics and Medicine", "Chemistry and Medicine", "Physics and Chemistry", "Peace and Physics"], answer: "Physics and Chemistry", explanation: "She shared the 1903 Nobel Prize in Physics and won the 1911 Nobel Prize in Chemistry for her work on radioactivity and radium." }
-  ];
 
   var POINTS = { easy: 1, medium: 2, hard: 3 };
   var LETTERS = ["A", "B", "C", "D"];
@@ -652,43 +4647,6 @@
     eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50,
     sixty: 60, seventy: 70, eighty: 80, ninety: 90, hundred: 100, thousand: 1000
   };
-
-  function pointsFor(diff) {
-    return POINTS[diff] || 1;
-  }
-
-  function shuffle(list) {
-    var arr = list.slice();
-    for (var i = arr.length - 1; i > 0; i--) {
-      var j = Math.floor(Math.random() * (i + 1));
-      var t = arr[i];
-      arr[i] = arr[j];
-      arr[j] = t;
-    }
-    return arr;
-  }
-
-  function buildRound(count) {
-    var by = { easy: [], medium: [], hard: [] };
-    QUESTIONS.forEach(function (q) { by[q.difficulty].push(q); });
-    var easy = shuffle(by.easy);
-    var medium = shuffle(by.medium);
-    var hard = shuffle(by.hard);
-    var ordered = easy.concat(medium, hard);
-    if (count && count < ordered.length) ordered = ordered.slice(0, count);
-    return ordered.map(function (q) {
-      var opts = shuffle(q.options.slice());
-      return {
-        difficulty: q.difficulty,
-        category: q.category,
-        question: q.question,
-        options: opts,
-        answer: q.answer,
-        explanation: q.explanation,
-        points: pointsFor(q.difficulty)
-      };
-    });
-  }
 
   function numberToWords(n) {
     n = Math.abs(parseInt(n, 10));
@@ -1011,13 +4969,213 @@
     return typeof window !== "undefined" && !!(window.SpeechRecognition || window.webkitSpeechRecognition);
   }
 
+
+
+  var DEFAULT_NAMES = ["Ernel", "Angela", "Easton", "Achilles"];
+  var TIER_LABELS = { easy: "Moderate", medium: "Tough", hard: "Hard" };
+  var TIER_ORDER = ["easy", "medium", "hard"];
+  var SEEN_KEY = "roadTripTriviaSeen";
+  var PREFS_KEY = "roadTripTriviaPrefs";
+
+  function pointsFor(diff) {
+    return POINTS[diff] || 1;
+  }
+
+  function shuffle(list) {
+    var arr = list.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i];
+      arr[i] = arr[j];
+      arr[j] = t;
+    }
+    return arr;
+  }
+
+  function normalizeQuestionText(s) {
+    return String(s == null ? "" : s)
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function tierCounts(count) {
+    var nEasy = Math.ceil(count / 3);
+    var nMed = Math.floor(count / 3) + (count % 3 === 2 ? 1 : 0);
+    var nHard = count - nEasy - nMed;
+    return { easy: nEasy, medium: nMed, hard: nHard };
+  }
+
+  function poolForAudience(audience) {
+    if (audience === "family") {
+      return QUESTIONS.filter(function (q) { return q.family; });
+    }
+    return QUESTIONS.slice();
+  }
+
+  function loadSeenIds(storage) {
+    try {
+      var store = storage || (typeof localStorage !== "undefined" ? localStorage : null);
+      if (!store) return [];
+      var raw = store.getItem(SEEN_KEY);
+      if (!raw) return [];
+      var data = JSON.parse(raw);
+      if (Array.isArray(data)) return data.filter(function (id) { return typeof id === "string"; });
+      if (data && Array.isArray(data.ids)) return data.ids.filter(function (id) { return typeof id === "string"; });
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveSeenIds(ids, storage) {
+    try {
+      var store = storage || (typeof localStorage !== "undefined" ? localStorage : null);
+      if (!store) return;
+      store.setItem(SEEN_KEY, JSON.stringify(ids));
+    } catch (e) { /* optional */ }
+  }
+
+  function resetSeenIds(storage) {
+    try {
+      var store = storage || (typeof localStorage !== "undefined" ? localStorage : null);
+      if (!store) return;
+      store.removeItem(SEEN_KEY);
+    } catch (e) { /* optional */ }
+  }
+
+  function buildRound(count, opts) {
+    opts = opts || {};
+    var audience = opts.audience === "family" ? "family" : "adult";
+    var storage = opts.storage;
+    var save = opts.save !== false;
+    var pool = poolForAudience(audience);
+    var needed = tierCounts(count);
+    var seen = loadSeenIds(storage);
+    var seenSet = {};
+    seen.forEach(function (id) { seenSet[id] = 1; });
+
+    var used = {};
+    var historyReset = false;
+    var unseenTotal = pool.filter(function (q) { return !seenSet[q.id]; }).length;
+    if (unseenTotal < count) {
+      historyReset = true;
+      seenSet = {};
+    }
+
+    function pickTier(tier, need) {
+      var list = pool.filter(function (q) { return q.difficulty === tier && !used[q.id]; });
+      var unseen = shuffle(list.filter(function (q) { return !seenSet[q.id]; }));
+      var pick = unseen.slice(0, need);
+      if (pick.length < need) {
+        historyReset = true;
+        var rest = shuffle(list.filter(function (q) {
+          return !pick.some(function (x) { return x.id === q.id; });
+        }));
+        pick = pick.concat(rest.slice(0, need - pick.length));
+      }
+      pick.forEach(function (q) { used[q.id] = 1; });
+      return pick;
+    }
+
+    var easyQ = pickTier("easy", needed.easy);
+    var mediumQ = pickTier("medium", needed.medium);
+    var hardQ = pickTier("hard", needed.hard);
+    var ordered = easyQ.concat(mediumQ, hardQ);
+
+    var deck = ordered.map(function (q) {
+      return {
+        id: q.id,
+        difficulty: q.difficulty,
+        category: q.category,
+        question: q.question,
+        options: shuffle(q.options.slice()),
+        answer: q.answer,
+        explanation: q.explanation,
+        points: pointsFor(q.difficulty),
+        family: q.family
+      };
+    });
+
+    var newIds = deck.map(function (q) { return q.id; });
+    var nextSeen;
+    if (historyReset) {
+      nextSeen = newIds.slice();
+    } else {
+      nextSeen = seen.concat(newIds);
+    }
+    if (save) saveSeenIds(nextSeen, storage);
+
+    return { deck: deck, historyReset: historyReset, seenIds: nextSeen };
+  }
+
+  function nextTurn(turn, playerCount) {
+    return (turn + 1) % playerCount;
+  }
+
+  function namesForCount(allNames, count) {
+    var names = [];
+    var i;
+    for (i = 0; i < count; i++) {
+      var n = (allNames && allNames[i] ? String(allNames[i]).trim() : "");
+      names.push(n || DEFAULT_NAMES[i]);
+    }
+    return names;
+  }
+
+  function rankPlayers(scores, correct, names) {
+    var rows = names.map(function (name, i) {
+      return { index: i, name: name, score: scores[i] || 0, correct: correct[i] || 0, place: 0 };
+    });
+    rows.sort(function (a, b) {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.correct - a.correct;
+    });
+    var place = 1;
+    for (var i = 0; i < rows.length; i++) {
+      if (i > 0 && rows[i].score === rows[i - 1].score && rows[i].correct === rows[i - 1].correct) {
+        rows[i].place = rows[i - 1].place;
+      } else {
+        rows[i].place = place;
+      }
+      place++;
+    }
+    return rows;
+  }
+
+  function resultsMessage(ranked) {
+    var winners = ranked.filter(function (r) { return r.place === 1; });
+    if (winners.length === 1) {
+      return { title: winners[0].name + " wins!", tag: "A clean run to the border." };
+    }
+    var names = winners.map(function (w) { return w.name; });
+    var last = names.pop();
+    var joined = names.length ? names.join(", ") + " and " + last : last;
+    return { title: "It's a tie!", tag: joined + " share the top score. Plenty of miles left for a rematch." };
+  }
+
+  function placeLabel(n) {
+    if (n === 1) return "1st";
+    if (n === 2) return "2nd";
+    if (n === 3) return "3rd";
+    return n + "th";
+  }
+
+
+
   var api = {
     QUESTIONS: QUESTIONS,
     POINTS: POINTS,
     LETTERS: LETTERS,
+    DEFAULT_NAMES: DEFAULT_NAMES,
+    TIER_LABELS: TIER_LABELS,
+    SEEN_KEY: SEEN_KEY,
+    PREFS_KEY: PREFS_KEY,
     shuffle: shuffle,
     buildRound: buildRound,
     normalizeText: normalizeText,
+    normalizeQuestionText: normalizeQuestionText,
     stripLeadingThe: stripLeadingThe,
     levenshtein: levenshtein,
     similarity: similarity,
@@ -1026,7 +5184,17 @@
     numberToWords: numberToWords,
     matchLetter: matchLetter,
     matchVoiceAnswer: matchVoiceAnswer,
-    speechSupported: speechSupported
+    speechSupported: speechSupported,
+    loadSeenIds: loadSeenIds,
+    saveSeenIds: saveSeenIds,
+    resetSeenIds: resetSeenIds,
+    poolForAudience: poolForAudience,
+    tierCounts: tierCounts,
+    nextTurn: nextTurn,
+    namesForCount: namesForCount,
+    rankPlayers: rankPlayers,
+    resultsMessage: resultsMessage,
+    placeLabel: placeLabel
   };
 
   if (typeof module !== "undefined" && module.exports) {
@@ -1039,7 +5207,9 @@
   var state = {
     mode: "alt",
     length: 20,
-    names: ["Ernel", "Angela"],
+    audience: "adult",
+    playerCount: 2,
+    names: DEFAULT_NAMES.slice(),
     deck: [],
     index: 0,
     scores: [0, 0],
@@ -1057,7 +5227,7 @@
 
   function loadPrefs() {
     try {
-      var raw = localStorage.getItem("roadTripTriviaPrefs");
+      var raw = localStorage.getItem(PREFS_KEY);
       if (!raw) return null;
       return JSON.parse(raw);
     } catch (e) {
@@ -1067,17 +5237,20 @@
 
   function savePrefs() {
     try {
-      localStorage.setItem("roadTripTriviaPrefs", JSON.stringify({
+      localStorage.setItem(PREFS_KEY, JSON.stringify({
         names: state.names,
         mode: state.mode,
-        length: state.length
+        length: state.length,
+        audience: state.audience,
+        playerCount: state.playerCount
       }));
     } catch (e) { /* optional */ }
   }
 
   function setPressed(ids, activeId) {
     ids.forEach(function (id) {
-      $(id).setAttribute("aria-pressed", id === activeId ? "true" : "false");
+      var el = $(id);
+      if (el) el.setAttribute("aria-pressed", id === activeId ? "true" : "false");
     });
   }
 
@@ -1100,21 +5273,85 @@
     return state.deck[state.index];
   }
 
-  function updateScoreboard() {
-    els.boardName0.textContent = state.names[0];
-    els.boardName1.textContent = state.names[1];
-    els.boardPts0.textContent = String(state.scores[0]);
-    els.boardPts1.textContent = String(state.scores[1]);
-    els.boardCorrect0.textContent = state.correct[0] + " correct";
-    els.boardCorrect1.textContent = state.correct[1] + " correct";
-    els.progressLabel.textContent = (state.index + 1) + " / " + state.deck.length;
-    var active = null;
-    if (!state.answered) {
-      if (state.mode === "alt") active = state.turn;
-      else if (state.poolPicker !== null) active = state.poolPicker;
+  function applyPlayerCountUI() {
+    var n = state.playerCount;
+    var namesWrap = $("names");
+    namesWrap.className = n === 2 ? "names" : "names count-" + n;
+    for (var i = 0; i < 4; i++) {
+      var field = $("name-field-" + i);
+      var input = $("name" + i);
+      field.hidden = i >= n;
+      if (input && !input.value) input.value = DEFAULT_NAMES[i];
     }
-    els.card0.classList.toggle("active", active === 0);
-    els.card1.classList.toggle("active", active === 1);
+    setPressed(["count-2", "count-3", "count-4"], "count-" + n);
+  }
+
+  function readNames() {
+    var all = [];
+    for (var i = 0; i < 4; i++) {
+      var v = (($("name" + i).value || "").trim()) || DEFAULT_NAMES[i];
+      all[i] = v;
+    }
+    state.names = all;
+  }
+
+  function activePlayerIndex() {
+    if (state.answered) return null;
+    if (state.mode === "alt") return state.turn;
+    if (state.poolPicker !== null) return state.poolPicker;
+    return null;
+  }
+
+  function makeScoreCard(i) {
+    var card = document.createElement("div");
+    card.className = "score-card p" + i;
+    card.id = "card" + i;
+    card.innerHTML = '<div class="who"></div><div class="pts"></div><div class="sub"></div>';
+    card.querySelector(".who").textContent = state.names[i];
+    card.querySelector(".pts").textContent = String(state.scores[i] || 0);
+    card.querySelector(".sub").textContent = (state.correct[i] || 0) + " correct";
+    if (activePlayerIndex() === i) card.classList.add("active");
+    return card;
+  }
+
+  function makeProgressCol() {
+    var col = document.createElement("div");
+    col.className = "progress-col";
+    col.innerHTML = '<strong id="progress-label"></strong>Q';
+    var q = currentQuestion();
+    var label = (state.index + 1) + " / " + state.deck.length;
+    col.querySelector("strong").textContent = label;
+    return col;
+  }
+
+  function updateRoundAndProgressText() {
+    var q = currentQuestion();
+    var total = state.deck.length;
+    var qText = "Question " + (state.index + 1) + " of " + total;
+    var rText = "";
+    if (q) {
+      var tierPos = TIER_ORDER.indexOf(q.difficulty) + 1;
+      rText = "Round " + tierPos + " of 3 · " + TIER_LABELS[q.difficulty];
+    }
+    if (els.roundLabel) els.roundLabel.textContent = rText;
+    if (els.progressLineLabel) els.progressLineLabel.textContent = qText;
+  }
+
+  function renderScoreboard() {
+    var n = state.playerCount;
+    els.scoreboard.innerHTML = "";
+    if (n === 2) {
+      els.scoreboard.className = "scoreboard";
+      if (els.progressLine) els.progressLine.classList.remove("show");
+      els.scoreboard.appendChild(makeScoreCard(0));
+      els.scoreboard.appendChild(makeProgressCol());
+      els.scoreboard.appendChild(makeScoreCard(1));
+    } else {
+      els.scoreboard.className = "scoreboard count-" + n;
+      if (els.progressLine) els.progressLine.classList.add("show");
+      for (var i = 0; i < n; i++) els.scoreboard.appendChild(makeScoreCard(i));
+    }
+    updateRoundAndProgressText();
   }
 
   function answersUnlocked() {
@@ -1133,13 +5370,35 @@
     els.btnMic.disabled = !answersUnlocked();
   }
 
+  function renderBuzz() {
+    var n = state.playerCount;
+    if (state.mode !== "pool") {
+      els.buzzPanel.hidden = true;
+      return;
+    }
+    els.buzzPanel.hidden = false;
+    els.buzzRow.className = "buzz-row count-" + n;
+    els.buzzRow.innerHTML = "";
+    for (var i = 0; i < n; i++) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn-buzz p" + i;
+      btn.textContent = state.names[i];
+      btn.disabled = state.answered || state.poolPicker !== null;
+      (function (p) {
+        btn.addEventListener("click", function () { pickPlayer(p); });
+      })(i);
+      els.buzzRow.appendChild(btn);
+    }
+  }
+
   function renderQuestion() {
     var q = currentQuestion();
     stopListening();
     state.answered = false;
     state.poolPicker = null;
 
-    els.diffBadge.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1);
+    els.diffBadge.textContent = TIER_LABELS[q.difficulty] || q.difficulty;
     els.diffBadge.className = "badge " + q.difficulty;
     els.catBadge.textContent = q.category;
     var pts = q.points;
@@ -1151,15 +5410,7 @@
     els.btnNext.hidden = true;
     els.btnNext.textContent = state.index === state.deck.length - 1 ? "See results" : "Next question";
 
-    if (state.mode === "pool") {
-      els.buzzPanel.hidden = false;
-      els.buzz0.disabled = false;
-      els.buzz1.disabled = false;
-      els.buzz0.textContent = state.names[0];
-      els.buzz1.textContent = state.names[1];
-    } else {
-      els.buzzPanel.hidden = true;
-    }
+    renderBuzz();
 
     els.answers.className = "answers";
     els.answers.innerHTML = "";
@@ -1175,18 +5426,18 @@
       els.answers.appendChild(btn);
     });
 
-    updateScoreboard();
+    renderScoreboard();
     setVoiceIdleMessage();
   }
 
   function pickPlayer(p) {
     if (state.answered || state.mode !== "pool" || state.poolPicker !== null) return;
     state.poolPicker = p;
-    els.buzz0.disabled = true;
-    els.buzz1.disabled = true;
-    var buttons = els.answers.querySelectorAll(".btn-answer");
-    for (var i = 0; i < buttons.length; i++) buttons[i].disabled = false;
-    updateScoreboard();
+    var buttons = els.buzzRow.querySelectorAll(".btn-buzz");
+    for (var i = 0; i < buttons.length; i++) buttons[i].disabled = true;
+    var answers = els.answers.querySelectorAll(".btn-answer");
+    for (var j = 0; j < answers.length; j++) answers[j].disabled = false;
+    renderScoreboard();
     setVoiceIdleMessage();
   }
 
@@ -1201,8 +5452,8 @@
 
     var player = state.mode === "pool" ? state.poolPicker : state.turn;
     var chosen = q.options[index];
-    var correct = chosen === q.answer;
-    if (correct) {
+    var isCorrect = chosen === q.answer;
+    if (isCorrect) {
       state.scores[player] += q.points;
       state.correct[player] += 1;
     }
@@ -1212,32 +5463,28 @@
     for (var i = 0; i < buttons.length; i++) {
       buttons[i].disabled = true;
       if (q.options[i] === q.answer) buttons[i].classList.add("correct");
-      if (i === index && !correct) buttons[i].classList.add("wrong");
+      if (i === index && !isCorrect) buttons[i].classList.add("wrong");
     }
-    if (state.mode === "pool") {
-      els.buzz0.disabled = true;
-      els.buzz1.disabled = true;
-    }
+    var buzzBtns = els.buzzRow.querySelectorAll(".btn-buzz");
+    for (var b = 0; b < buzzBtns.length; b++) buzzBtns[b].disabled = true;
 
     var name = state.names[player];
-    var verdict = correct
-      ? "Nice one, " + name + "!"
-      : "Not quite, " + name + ".";
+    var verdict = isCorrect ? "Nice one, " + name + "!" : "Not quite, " + name + ".";
     els.feedback.hidden = false;
     els.feedback.innerHTML =
-      '<div class="verdict ' + (correct ? "ok" : "no") + '"></div>' +
+      '<div class="verdict ' + (isCorrect ? "ok" : "no") + '"></div>' +
       '<p class="explain"></p>';
-    els.feedback.querySelector(".verdict").textContent = verdict + (correct ? " +" + q.points + " " + (q.points === 1 ? "point" : "points") + "." : " The correct answer is " + q.answer + ".");
+    els.feedback.querySelector(".verdict").textContent = verdict + (isCorrect ? " +" + q.points + " " + (q.points === 1 ? "point" : "points") + "." : " The correct answer is " + q.answer + ".");
     els.feedback.querySelector(".explain").textContent = q.explanation;
     els.btnNext.hidden = false;
     els.btnMic.disabled = true;
     els.voiceStatus.textContent = "";
-    updateScoreboard();
+    renderScoreboard();
   }
 
   function nextQuestion() {
     if (!state.answered) return;
-    if (state.mode === "alt") state.turn = 1 - state.turn;
+    if (state.mode === "alt") state.turn = nextTurn(state.turn, state.playerCount);
     state.index += 1;
     if (state.index >= state.deck.length) {
       showResults();
@@ -1249,43 +5496,41 @@
   function showResults() {
     stopListening();
     showScreen("screen-results");
-    els.resultName0.textContent = state.names[0];
-    els.resultName1.textContent = state.names[1];
-    els.resultPts0.textContent = String(state.scores[0]);
-    els.resultPts1.textContent = String(state.scores[1]);
-    els.resultCorrect0.textContent = state.correct[0] + " correct";
-    els.resultCorrect1.textContent = state.correct[1] + " correct";
-    els.resultCard0.classList.toggle("winner", state.scores[0] > state.scores[1]);
-    els.resultCard1.classList.toggle("winner", state.scores[1] > state.scores[0]);
-
-    var title, tag;
-    if (state.scores[0] > state.scores[1]) {
-      title = state.names[0] + " wins!";
-      tag = "A clean run to the border.";
-    } else if (state.scores[1] > state.scores[0]) {
-      title = state.names[1] + " wins!";
-      tag = "A clean run to the border.";
+    var ranked = rankPlayers(state.scores, state.correct, state.names.slice(0, state.playerCount));
+    var msg = resultsMessage(ranked);
+    els.resultsTitle.textContent = msg.title;
+    els.resultsTagline.textContent = msg.tag;
+    if (state.playerCount === 2) {
+      els.resultGrid.className = "result-grid";
     } else {
-      title = "It's a tie!";
-      tag = "Plenty of miles left for a rematch.";
+      els.resultGrid.className = "result-grid count-" + state.playerCount;
     }
-    els.resultsTitle.textContent = title;
-    els.resultsTagline.textContent = tag;
+    els.resultGrid.innerHTML = "";
+    ranked.forEach(function (row) {
+      var card = document.createElement("div");
+      card.className = "panel result-card p" + row.index + (row.place === 1 ? " winner" : "");
+      var placeHtml = state.playerCount > 2 ? '<div class="place"></div>' : "";
+      card.innerHTML = placeHtml + '<div class="who"></div><div class="pts"></div><div class="sub"></div>';
+      if (state.playerCount > 2) card.querySelector(".place").textContent = placeLabel(row.place);
+      card.querySelector(".who").textContent = row.name;
+      card.querySelector(".pts").textContent = String(row.score);
+      card.querySelector(".sub").textContent = row.correct + " correct";
+      els.resultGrid.appendChild(card);
+    });
   }
 
-  function readNames() {
-    var n0 = (els.name0.value || "").trim() || "Ernel";
-    var n1 = (els.name1.value || "").trim() || "Angela";
-    state.names = [n0, n1];
-  }
-
-  function startGame(reshuffleOnly) {
+  function startGame() {
     readNames();
     savePrefs();
-    state.deck = buildRound(state.length);
+    var built = buildRound(state.length, { audience: state.audience, save: true });
+    state.deck = built.deck;
     state.index = 0;
-    state.scores = [0, 0];
-    state.correct = [0, 0];
+    state.scores = [];
+    state.correct = [];
+    for (var i = 0; i < state.playerCount; i++) {
+      state.scores[i] = 0;
+      state.correct[i] = 0;
+    }
     state.turn = 0;
     state.poolPicker = null;
     state.answered = false;
@@ -1390,24 +5635,16 @@
   }
 
   function init() {
-    els.name0 = $("name0");
-    els.name1 = $("name1");
-    els.boardName0 = $("board-name0");
-    els.boardName1 = $("board-name1");
-    els.boardPts0 = $("board-pts0");
-    els.boardPts1 = $("board-pts1");
-    els.boardCorrect0 = $("board-correct0");
-    els.boardCorrect1 = $("board-correct1");
-    els.card0 = $("card0");
-    els.card1 = $("card1");
-    els.progressLabel = $("progress-label");
+    els.scoreboard = $("scoreboard");
+    els.progressLine = $("progress-line");
+    els.progressLineLabel = $("progress-line-label");
+    els.roundLabel = $("round-label");
     els.diffBadge = $("diff-badge");
     els.catBadge = $("cat-badge");
     els.worthBadge = $("worth-badge");
     els.questionText = $("question-text");
     els.buzzPanel = $("buzz-panel");
-    els.buzz0 = $("buzz0");
-    els.buzz1 = $("buzz1");
+    els.buzzRow = $("buzz-row");
     els.answers = $("answers");
     els.btnMic = $("btn-mic");
     els.voiceStatus = $("voice-status");
@@ -1416,24 +5653,30 @@
     els.btnNext = $("btn-next");
     els.resultsTitle = $("results-title");
     els.resultsTagline = $("results-tagline");
-    els.resultName0 = $("result-name0");
-    els.resultName1 = $("result-name1");
-    els.resultPts0 = $("result-pts0");
-    els.resultPts1 = $("result-pts1");
-    els.resultCorrect0 = $("result-correct0");
-    els.resultCorrect1 = $("result-correct1");
-    els.resultCard0 = $("result-card0");
-    els.resultCard1 = $("result-card1");
+    els.resultGrid = $("result-grid");
+    els.historyStatus = $("history-status");
 
     var prefs = loadPrefs();
     if (prefs) {
-      if (prefs.names && prefs.names[0]) els.name0.value = prefs.names[0];
-      if (prefs.names && prefs.names[1]) els.name1.value = prefs.names[1];
+      if (Array.isArray(prefs.names)) {
+        for (var i = 0; i < 4; i++) {
+          if (prefs.names[i]) $("name" + i).value = prefs.names[i];
+        }
+        state.names = namesForCount(prefs.names.concat(DEFAULT_NAMES).slice(0, 4), 4);
+      }
       if (prefs.mode === "alt" || prefs.mode === "pool") state.mode = prefs.mode;
       if (prefs.length === 20 || prefs.length === 30 || prefs.length === 50) state.length = prefs.length;
+      if (prefs.audience === "family" || prefs.audience === "adult") state.audience = prefs.audience;
+      if (prefs.playerCount === 2 || prefs.playerCount === 3 || prefs.playerCount === 4) state.playerCount = prefs.playerCount;
     }
+    for (var n = 0; n < 4; n++) {
+      if (!$("name" + n).value) $("name" + n).value = DEFAULT_NAMES[n];
+    }
+
     setPressed(["mode-alt", "mode-pool"], state.mode === "pool" ? "mode-pool" : "mode-alt");
     setPressed(["len-20", "len-30", "len-50"], "len-" + state.length);
+    setPressed(["aud-adult", "aud-family"], state.audience === "family" ? "aud-family" : "aud-adult");
+    applyPlayerCountUI();
 
     $("mode-alt").addEventListener("click", function () {
       state.mode = "alt";
@@ -1455,14 +5698,30 @@
       state.length = 50;
       setPressed(["len-20", "len-30", "len-50"], "len-50");
     });
-    $("btn-start").addEventListener("click", function () { startGame(false); });
-    $("btn-rematch").addEventListener("click", function () { startGame(true); });
+    $("aud-adult").addEventListener("click", function () {
+      state.audience = "adult";
+      setPressed(["aud-adult", "aud-family"], "aud-adult");
+    });
+    $("aud-family").addEventListener("click", function () {
+      state.audience = "family";
+      setPressed(["aud-adult", "aud-family"], "aud-family");
+    });
+    ["count-2", "count-3", "count-4"].forEach(function (id) {
+      $(id).addEventListener("click", function () {
+        state.playerCount = parseInt(id.split("-")[1], 10);
+        applyPlayerCountUI();
+      });
+    });
+    $("btn-start").addEventListener("click", startGame);
+    $("btn-rematch").addEventListener("click", startGame);
     $("btn-new").addEventListener("click", function () {
       stopListening();
       showScreen("screen-start");
     });
-    els.buzz0.addEventListener("click", function () { pickPlayer(0); });
-    els.buzz1.addEventListener("click", function () { pickPlayer(1); });
+    $("btn-reset-history").addEventListener("click", function () {
+      resetSeenIds();
+      els.historyStatus.textContent = "Question history cleared. The next game can use the full pool again.";
+    });
     els.btnNext.addEventListener("click", nextQuestion);
     els.btnMic.addEventListener("click", onMicClick);
     setupVoiceUi();
@@ -1473,7 +5732,9 @@
   } else {
     init();
   }
+
 })(typeof window !== "undefined" ? window : globalThis);
+
   </script>
 </body>
 </html>
